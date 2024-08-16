@@ -1,38 +1,52 @@
-import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
+import React, { useEffect, useState } from "react";
 import { Accelerometer, AccelerometerMeasurement } from "expo-sensors";
 
 interface PropsType {
+  /** Callback function to update external data with the current accelerometer measurement */
   updateData: (data: AccelerometerMeasurement) => void;
+
+  /** Boolean flag to start or stop the accelerometer sensor. */
   startSensor: boolean;
 }
 
 export default function Sensor({ updateData, startSensor }: PropsType) {
-  /* Current reading */
+  /* State to store the current accelerometer readings */
   const [{ x, y, z }, setData] = useState({
     x: 0,
     y: 0,
     z: 0,
   });
 
+  /**
+   * Stops measuring by removing all accelerometer listeners and resetting state.
+   */
   const stopMeasuring = () => {
     Accelerometer.removeAllListeners();
     setData({ x: 0, y: 0, z: 0 });
   };
 
+  /**
+   * Starts measuring by setting the update interval and adding a listener
+   * to handle accelerometer data updates.
+   */
   const startMeasuring = () => {
-    Accelerometer.setUpdateInterval(200);
+    Accelerometer.setUpdateInterval(200); // Update every 200 milliseconds
     Accelerometer.addListener((data) => {
       setData(data);
-      updateData(data);
+      updateData(data); // Call the external updateData function with the latest data
     });
   };
 
   useEffect(() => {
+    // Start or stop the sensor based on the startSensor flag
     if (startSensor) {
       startMeasuring();
-    } else stopMeasuring();
+    } else {
+      stopMeasuring();
+    }
 
+    // Cleanup function to remove listeners when the component is unmounted or the sensor is stopped
     return () => Accelerometer.removeAllListeners();
   }, [startSensor]);
 
