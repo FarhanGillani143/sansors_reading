@@ -1,7 +1,7 @@
 import { Alert } from "react-native";
 import * as Sharing from "expo-sharing";
 import * as FileSystem from "expo-file-system";
-import { AccelerometerDataType } from "../app/components/Accelerometer/Accelerometer";
+import { AccelerometerDataType } from "../components/Accelerometer/Accelerometer";
 
 /**
  * Converts an array of objects into a CSV-formatted string depending on the type of sensor.

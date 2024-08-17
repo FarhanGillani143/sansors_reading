@@ -1,10 +1,10 @@
-import { Button, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import * as Location from "expo-location";
 import { useContext, useEffect, useState } from "react";
 import {
   SensorsContext,
   SensorContextType,
-} from "../../../Context/ContextProvider";
+} from "../../context/ContextProvider";
 
 const emptyPositionObject = {
   timestamp: 0,
@@ -34,7 +34,6 @@ export default function GPS() {
   useEffect(() => {
     let locationSubscription: Location.LocationSubscription | undefined;
     (async () => {
-      console.log(locationPermission, startSensors);
       if (locationPermission && startSensors) {
         locationSubscription = await Location.watchPositionAsync(
           { timeInterval: 200, distanceInterval: 0 },
@@ -68,7 +67,7 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "yellow",
+    backgroundColor: "#e1bee7",
   },
   title: {
     fontSize: 18,

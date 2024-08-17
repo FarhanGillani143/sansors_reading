@@ -1,21 +1,33 @@
 import React, { createContext, useEffect, useRef, useState } from "react";
+import { Alert } from "react-native";
 import * as Location from "expo-location";
 import { AccelerometerMeasurement } from "expo-sensors";
-import dateTimeStringWithMilliseconds from "../utils/dateTimeStringwithMs";
-import { AccelerometerDataType } from "../app/components/Accelerometer/Accelerometer";
 
+import dateTimeStringWithMilliseconds from "../utils/dateTimeStringwithMs";
+import { AccelerometerDataType } from "../components/Accelerometer/Accelerometer";
+
+/**
+ * Type representing the sensor data, specifically accelerometer data.
+ */
 export type SensorDataType = {
   accelerometerData: AccelerometerDataType[];
 };
 
+/**
+ * Interface representing the structure of the context used for managing sensor data and state.
+ */
 export interface SensorContextType {
-  sensorsData: AccelerometerDataType[];
-  locationPermission: boolean;
-  startSensors: boolean;
-  sensorsController: VoidFunction;
-  updateData: (data: AccelerometerMeasurement) => void;
+  sensorsData: AccelerometerDataType[]; // Array of accelerometer readings
+  locationPermission: boolean; // Flag indicating if location permission is granted
+  startSensors: boolean; // Flag to start or stop the sensors
+  sensorsController: VoidFunction; // Function to toggle the sensor state
+  updateData: (data: AccelerometerMeasurement) => void; // Function to update the sensor data
 }
 
+/**
+ * Context to provide and manage the state related to sensors (e.g., accelerometer).
+ * Initializes with default values.
+ */
 export const SensorsContext = createContext<SensorContextType>({
   sensorsData: [],
   startSensors: false,
@@ -24,53 +36,66 @@ export const SensorsContext = createContext<SensorContextType>({
   updateData(data) {},
 });
 
+/**
+ * Props type for the SensorContextProvider component.
+ */
 type PropsType = {
-  children: JSX.Element[];
+  children: JSX.Element | JSX.Element[];
 };
 
+/**
+ * SensorContextProvider component that provides sensor data and state management
+ * to all its children components through context.
+ *
+ * @param {PropsType} props - The children components that will have access to the sensor context.
+ * @returns {JSX.Element} The provider component wrapping its children with sensor context.
+ */
 export default function SensorContextProvider({ children }: PropsType) {
-  const sensorDataRef = useRef<AccelerometerDataType[]>([]);
-  const [startSensors, setStartSensors] = useState<boolean>(false);
-  const [locationPermission, setLocationPermission] = useState<boolean>(false);
+  const sensorDataRef = useRef<AccelerometerDataType[]>([]); // Ref to store the accelerometer data
+  const [startSensors, setStartSensors] = useState<boolean>(false); // State to track if sensors should be running
+  const [locationPermission, setLocationPermission] = useState<boolean>(false); // State to track location permission status
 
-  const [status, requestPermission] = Location.useForegroundPermissions();
+  const [status, requestPermission] = Location.useForegroundPermissions(); // Location permission hook from expo-location
 
+  /**
+   * Requests location permission if it has not been granted yet.
+   * Updates the `locationPermission` state based on the user's decision.
+   */
   const requestLocatonPermission = async () => {
-    console.log("Requesting location permission");
     if (status?.granted) {
-      console.log("Location permission granted");
       setLocationPermission(true);
     } else {
-      console.log("Location permission denied");
       const { granted } = await requestPermission();
       if (granted) {
-        console.log("Now granted");
         setLocationPermission(true);
       } else {
-        console.log("denied again");
+        Alert.alert("Location Permission Denied");
       }
     }
   };
 
-  /** Starts or stops the sensor based on its current state. */
+  /** Toggles the start or stop state of the sensors. */
   const sensorsController = () => setStartSensors(!startSensors);
 
   /**
-   * Prepends newly measured sensor readings to the list to ensure it remains up-to-date.
+   * Updates the accelerometer data by prepending the latest reading to the sensor data array.
+   * Handles the issue of missing `timestamp` on Android by manually adding a timestamp.
+   *
+   * @param {AccelerometerMeasurement} data - The latest accelerometer measurement.
    */
   const updateData = (data: AccelerometerMeasurement) => {
     /*
-     * The `timestamp` property in the `AccelerometerMeasurement` object
-     * consistently returns `undefined` on Android devices.
+     * The timestamp property in the AccelerometerMeasurement object
+     * consistently returns undefined on Android devices.
      * To address this issue, we manually add timestamps to ensure accurate timing data.
      */
-
     const timestamp = dateTimeStringWithMilliseconds();
     const reading = { ...data, timestamp };
-    sensorDataRef.current.unshift(reading);
+    sensorDataRef.current.unshift(reading); // Add the new reading to the start of the array
   };
 
   useEffect(() => {
+    // Request location permission if it hasn't been granted yet
     (async () => !locationPermission && (await requestLocatonPermission()))();
   }, []);
 
