@@ -51,20 +51,28 @@ export default function Sensor() {
 
   return (
     <View style={styles.container}>
-      <View style={[styles.container, { gap: 10 }]}>
-        <Text>Accelerometer: (in gs where 1g = 9.81 m/s^2)</Text>
-        <Text>x: {x.toFixed(2)}</Text>
-        <Text>y: {y.toFixed(2)}</Text>
-        <Text>z: {z.toFixed(2)}</Text>
-      </View>
+      <Text style={styles.title}>
+        Acceleration (in gs where 1g = 9.81 m/s^2)
+      </Text>
+      <Text>x: {x.toFixed(2)}</Text>
+      <Text>y: {y.toFixed(2)}</Text>
+      <Text>z: {z.toFixed(2)}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    gap: 5,
+    padding: 10,
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: "orange",
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginVertical: 10,
   },
 });

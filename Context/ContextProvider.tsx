@@ -1,4 +1,5 @@
-import React, { createContext, useRef, useState } from "react";
+import React, { createContext, useEffect, useRef, useState } from "react";
+import * as Location from "expo-location";
 import { AccelerometerMeasurement } from "expo-sensors";
 import dateTimeStringWithMilliseconds from "../utils/dateTimeStringwithMs";
 import { AccelerometerDataType } from "../app/components/Accelerometer/Accelerometer";
@@ -9,6 +10,7 @@ export type SensorDataType = {
 
 export interface SensorContextType {
   sensorsData: AccelerometerDataType[];
+  locationPermission: boolean;
   startSensors: boolean;
   sensorsController: VoidFunction;
   updateData: (data: AccelerometerMeasurement) => void;
@@ -17,6 +19,7 @@ export interface SensorContextType {
 export const SensorsContext = createContext<SensorContextType>({
   sensorsData: [],
   startSensors: false,
+  locationPermission: false,
   sensorsController() {},
   updateData(data) {},
 });
@@ -28,6 +31,26 @@ type PropsType = {
 export default function SensorContextProvider({ children }: PropsType) {
   const sensorDataRef = useRef<AccelerometerDataType[]>([]);
   const [startSensors, setStartSensors] = useState<boolean>(false);
+  const [locationPermission, setLocationPermission] = useState<boolean>(false);
+
+  const [status, requestPermission] = Location.useForegroundPermissions();
+
+  const requestLocatonPermission = async () => {
+    console.log("Requesting location permission");
+    if (status?.granted) {
+      console.log("Location permission granted");
+      setLocationPermission(true);
+    } else {
+      console.log("Location permission denied");
+      const { granted } = await requestPermission();
+      if (granted) {
+        console.log("Now granted");
+        setLocationPermission(true);
+      } else {
+        console.log("denied again");
+      }
+    }
+  };
 
   /** Starts or stops the sensor based on its current state. */
   const sensorsController = () => setStartSensors(!startSensors);
@@ -46,6 +69,11 @@ export default function SensorContextProvider({ children }: PropsType) {
     const reading = { ...data, timestamp };
     sensorDataRef.current.unshift(reading);
   };
+
+  useEffect(() => {
+    (async () => !locationPermission && (await requestLocatonPermission()))();
+  }, []);
+
   return (
     <SensorsContext.Provider
       value={{
@@ -53,6 +81,7 @@ export default function SensorContextProvider({ children }: PropsType) {
         updateData,
         sensorsController,
         startSensors,
+        locationPermission,
       }}
     >
       {children}

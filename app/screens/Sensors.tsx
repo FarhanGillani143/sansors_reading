@@ -1,5 +1,6 @@
 import React, { useContext, useState } from "react";
 import { Button, StyleSheet, View } from "react-native";
+import GPS from "../components/GPS/GPS";
 import DisplayDataList from "../components/DisplayDataList";
 import { downloadCSV } from "../../utils/ArrayToCSV";
 import AccelerometerSensor from "../components/Accelerometer/Accelerometer";
@@ -32,26 +33,28 @@ export default function Sensors() {
   const handleDownload = async () =>
     await downloadCSV({
       arr: sensorsData,
-      fileName: "Accelerometer",
       sensor: "Accelerometer",
     });
 
   return (
     <View style={styles.container}>
-      <View style={[styles.container, { gap: 10 }]}>
+      <View style={[styles.container, { gap: 10, flex: 3 }]}>
         <AccelerometerSensor />
+        <GPS />
       </View>
-      <Button
-        onPress={sensorsController}
-        title={startSensors ? "Stop Measuring" : "Start Measuring"}
-      />
-      {buttonCheck() && <Button onPress={listSwitch} title={buttonTitle} />}
-      {buttonCheck() && (
-        <Button onPress={handleDownload} title={"Download Data as CSV"} />
-      )}
-      {showAllReadings && !startSensors && (
-        <DisplayDataList data={sensorsData} />
-      )}
+      <View style={{ flex: 1 }}>
+        <Button
+          onPress={sensorsController}
+          title={startSensors ? "Stop Measuring" : "Start Measuring"}
+        />
+        {buttonCheck() && <Button onPress={listSwitch} title={buttonTitle} />}
+        {buttonCheck() && (
+          <Button onPress={handleDownload} title={"Download Data as CSV"} />
+        )}
+        {showAllReadings && !startSensors && (
+          <DisplayDataList data={sensorsData} />
+        )}
+      </View>
     </View>
   );
 }
@@ -61,7 +64,6 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     alignItems: "center",
-    backgroundColor: "#fff",
     justifyContent: "center",
   },
 });
