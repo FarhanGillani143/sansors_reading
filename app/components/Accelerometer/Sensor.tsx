@@ -1,22 +1,21 @@
 import { View, Text, StyleSheet } from "react-native";
-import React, { useEffect, useState } from "react";
-import { Accelerometer, AccelerometerMeasurement } from "expo-sensors";
+import React, { useContext, useEffect, useState } from "react";
+import { Accelerometer } from "expo-sensors";
+import {
+  SensorsContext,
+  SensorContextType,
+} from "../../../Context/ContextProvider";
 
-interface PropsType {
-  /** Callback function to update external data with the current accelerometer measurement */
-  updateData: (data: AccelerometerMeasurement) => void;
-
-  /** Boolean flag to start or stop the accelerometer sensor. */
-  startSensor: boolean;
-}
-
-export default function Sensor({ updateData, startSensor }: PropsType) {
+export default function Sensor() {
   /* State to store the current accelerometer readings */
   const [{ x, y, z }, setData] = useState({
     x: 0,
     y: 0,
     z: 0,
   });
+
+  const { startSensors, updateData } =
+    useContext<SensorContextType>(SensorsContext);
 
   /**
    * Stops measuring by removing all accelerometer listeners and resetting state.
@@ -40,7 +39,7 @@ export default function Sensor({ updateData, startSensor }: PropsType) {
 
   useEffect(() => {
     // Start or stop the sensor based on the startSensor flag
-    if (startSensor) {
+    if (startSensors) {
       startMeasuring();
     } else {
       stopMeasuring();
@@ -48,7 +47,7 @@ export default function Sensor({ updateData, startSensor }: PropsType) {
 
     // Cleanup function to remove listeners when the component is unmounted or the sensor is stopped
     return () => Accelerometer.removeAllListeners();
-  }, [startSensor]);
+  }, [startSensors]);
 
   return (
     <View style={styles.container}>

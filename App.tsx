@@ -1,21 +1,12 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, View } from "react-native";
-import AccelerometerSensor from "./sensors/Accelerometer/Accelerometer";
+import Sensors from "./app/screens/Sensors";
+import SensorContextProvider from "./Context/ContextProvider";
 
 export default function App() {
   return (
-    <View style={styles.container}>
+    <SensorContextProvider>
       <StatusBar style="auto" />
-      <AccelerometerSensor />
-    </View>
+      <Sensors />
+    </SensorContextProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});

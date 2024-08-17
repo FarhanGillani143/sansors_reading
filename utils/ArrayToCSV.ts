@@ -1,7 +1,7 @@
 import { Alert } from "react-native";
 import * as Sharing from "expo-sharing";
 import * as FileSystem from "expo-file-system";
-import { MeasurementType } from "../sensors/Accelerometer/Accelerometer";
+import { AccelerometerDataType } from "../app/components/Accelerometer/Accelerometer";
 
 /**
  * Converts an array of objects into a CSV-formatted string depending on the type of sensor.
@@ -17,14 +17,15 @@ import { MeasurementType } from "../sensors/Accelerometer/Accelerometer";
  */
 
 export function convertArrayToCSV(
-  arr: MeasurementType[],
+  arr: AccelerometerDataType[],
   sensor: "Accelerometer"
 ) {
   if (sensor == "Accelerometer") {
     const headers = ["timestamp", "x", "y", "z"];
 
     const rows = arr.map(
-      (obj: MeasurementType) => `"${obj.timestamp}",${obj.x},${obj.y},${obj.z}`
+      (obj: AccelerometerDataType) =>
+        `"${obj.timestamp}",${obj.x},${obj.y},${obj.z}`
     );
 
     return [headers.join(","), ...rows].join("\n");
@@ -32,7 +33,7 @@ export function convertArrayToCSV(
 }
 
 type Arguments = {
-  arr: MeasurementType[];
+  arr: AccelerometerDataType[];
   fileName?: string;
   sensor: "Accelerometer";
 };

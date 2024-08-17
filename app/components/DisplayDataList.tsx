@@ -1,13 +1,13 @@
 import React from "react";
 import { View, Text, StyleSheet, FlatList } from "react-native";
-import { MeasurementType } from "./Accelerometer";
+import { AccelerometerDataType } from "./Accelerometer/Accelerometer";
 
 type PropsType = {
-  data: MeasurementType[];
+  data: AccelerometerDataType[];
 };
 
-export default function ReadingsList({ data }: PropsType) {
-  const renderItem = ({ item }: { item: MeasurementType }) => {
+export default function DisplayDataList({ data }: PropsType) {
+  const renderItem = ({ item }: { item: AccelerometerDataType }) => {
     return (
       <View style={styles.listItem}>
         <Text>{item.timestamp}</Text>
