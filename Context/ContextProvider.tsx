@@ -1,6 +1,7 @@
 import React, { createContext, useEffect, useRef, useState } from "react";
 import { AppState, AppStateStatus } from "react-native";
 import * as Location from "expo-location";
+import { activateKeepAwakeAsync, deactivateKeepAwake } from "expo-keep-awake";
 
 import dateTimeStringWithMilliseconds from "../utils/dateTimeStringwithMs";
 import { requestLocatonPermissionAsync } from "../utils/LocationPermission";
@@ -110,6 +111,18 @@ export default function SensorContextProvider({ children }: PropsType) {
       }
     })();
   }, []);
+
+  useEffect(() => {
+    (async () => {
+      if (startSensors) {
+        console.log("Activated keep screen awake!!!")
+        await activateKeepAwakeAsync();
+      } else {
+        console.log("Deactivated keep screen awake!!!")
+        deactivateKeepAwake();
+      }
+    })();
+  }, [startSensors]);
 
   /**
    * Monitors app state changes to update the location permission state

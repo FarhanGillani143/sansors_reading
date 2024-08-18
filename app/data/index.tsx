@@ -21,6 +21,7 @@ export default function DisplayDataList() {
   return (
     <View style={styles.dataContainer}>
       <Button onPress={handleDownload} title={"Download Data as CSV"} />
+      <Text>Total Records: {sensorsData.length}</Text>
       <View style={styles.flatListContainer}>
         <FlatList
           data={sensorsData}
@@ -41,6 +42,7 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 10,
     width: "100%",
+    paddingTop: 10,
     alignItems: "center",
   },
   flatListContainer: {
