@@ -1,24 +1,9 @@
 import { useState, useEffect, useContext } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { Accelerometer, AccelerometerMeasurement } from "expo-sensors";
-import {
-  SensorsContext,
-  SensorContextType,
-} from "../../context/ContextProvider";
+import { Accelerometer } from "expo-sensors";
 
-/**
- * The `timestamp` property in the `AccelerometerMeasurement` object is originally a `number`.
- * However, to make it more user-friendly and easily understandable, we convert it to a `string`.
- * This conversion allows for better readability and clearer representation of time values.
- * Therefore, we manually change the type of the `timestamp` from `number` to `string`.
- */
-
-export type AccelerometerDataType = Omit<
-  AccelerometerMeasurement,
-  "timestamp"
-> & {
-  timestamp: string;
-};
+import { SensorContextType } from "../../utils/DataTypes";
+import { SensorsContext } from "../../context/ContextProvider";
 
 export default function AccelerometerSensor() {
   const [isSensorAvailable, setIsSensorAvailable] = useState<boolean>(false);
@@ -40,31 +25,31 @@ export default function AccelerometerSensor() {
     useContext<SensorContextType>(SensorsContext);
 
   /**
-   * Stops measuring by removing all accelerometer listeners and resetting state.
+   * Stops tracking by removing all accelerometer listeners and resetting state.
    */
-  const stopMeasuring = () => {
+  const stopTracking = () => {
     Accelerometer.removeAllListeners();
     setData({ x: 0, y: 0, z: 0 });
   };
 
   /**
-   * Starts measuring by setting the update interval and adding a listener
+   * Starts tracking by setting the update interval and adding a listener
    * to handle accelerometer data updates.
    */
-  const startMeasuring = () => {
+  const startTracking = () => {
     Accelerometer.setUpdateInterval(200); // Update every 200 milliseconds
     Accelerometer.addListener((data) => {
       setData(data);
-      updateData(data); // Call the external updateData function with the latest data
+      updateData({ acceleration: data }); // Call the external updateData function with the latest data
     });
   };
 
   useEffect(() => {
     // Start or stop the sensor based on the startSensor flag
     if (startSensors) {
-      startMeasuring();
+      startTracking();
     } else {
-      stopMeasuring();
+      stopTracking();
     }
 
     // Cleanup function to remove listeners when the component is unmounted or the sensor is stopped

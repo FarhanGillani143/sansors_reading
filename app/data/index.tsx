@@ -1,12 +1,10 @@
 import React, { useContext } from "react";
 import { View, Text, StyleSheet, FlatList, Button } from "react-native";
 
-import { downloadCSV } from "../../utils/ArrayToCSV";
 import { renderItem } from "./RenderItem";
-import {
-  SensorsContext,
-  SensorContextType,
-} from "../../context/ContextProvider";
+import { downloadCSV } from "../../utils/ArrayToCSV";
+import { SensorContextType } from "../../utils/DataTypes";
+import { SensorsContext } from "../../context/ContextProvider";
 
 const EmptyListComponent = (
   <View style={{ alignItems: "center" }}>
@@ -18,11 +16,7 @@ export default function DisplayDataList() {
   const { sensorsData } = useContext<SensorContextType>(SensorsContext);
 
   /** Downloads the sensor readings and saves them as a CSV file. */
-  const handleDownload = async () =>
-    await downloadCSV({
-      arr: sensorsData,
-      sensor: "Accelerometer",
-    });
+  const handleDownload = async () => await downloadCSV({ arr: sensorsData });
 
   return (
     <View style={styles.dataContainer}>

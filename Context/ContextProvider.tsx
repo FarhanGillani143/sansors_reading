@@ -1,112 +1,138 @@
 import React, { createContext, useEffect, useRef, useState } from "react";
-import { Alert } from "react-native";
+import { AppState, AppStateStatus } from "react-native";
 import * as Location from "expo-location";
-import { AccelerometerMeasurement } from "expo-sensors";
 
 import dateTimeStringWithMilliseconds from "../utils/dateTimeStringwithMs";
-import { AccelerometerDataType } from "../components/Accelerometer/Accelerometer";
+import { requestLocatonPermissionAsync } from "../utils/LocationPermission";
+import {
+  SensorDataType,
+  SensorContextType,
+  UpdateDataArguments,
+  AccelerometerDataType,
+} from "../utils/DataTypes";
 
 /**
- * Type representing the sensor data, specifically accelerometer data.
- */
-export type SensorDataType = {
-  accelerometerData: AccelerometerDataType[];
-};
-
-/**
- * Interface representing the structure of the context used for managing sensor data and state.
- */
-export interface SensorContextType {
-  sensorsData: AccelerometerDataType[]; // Array of accelerometer readings
-  locationPermission: boolean; // Flag indicating if location permission is granted
-  startSensors: boolean; // Flag to start or stop the sensors
-  sensorsController: VoidFunction; // Function to toggle the sensor state
-  updateData: (data: AccelerometerMeasurement) => void; // Function to update the sensor data
-}
-
-/**
- * Context to provide and manage the state related to sensors (e.g., accelerometer).
- * Initializes with default values.
+ * Context to manage and provide sensor-related state, including accelerometer and location data.
+ * The context offers functions to control sensors and update their data, and initializes with default values.
  */
 export const SensorsContext = createContext<SensorContextType>({
   sensorsData: [],
   startSensors: false,
   locationPermission: false,
   sensorsController() {},
-  updateData(data) {},
+  updateData() {},
+  requestLocationPermission() {},
 });
 
-/**
- * Props type for the SensorContextProvider component.
- */
 type PropsType = {
   children: JSX.Element | JSX.Element[];
 };
 
-/**
- * SensorContextProvider component that provides sensor data and state management
- * to all its children components through context.
- *
- * @param {PropsType} props - The children components that will have access to the sensor context.
- * @returns {JSX.Element} The provider component wrapping its children with sensor context.
- */
 export default function SensorContextProvider({ children }: PropsType) {
-  const sensorDataRef = useRef<AccelerometerDataType[]>([]); // Ref to store the accelerometer data
-  const [startSensors, setStartSensors] = useState<boolean>(false); // State to track if sensors should be running
+  const sensorDataRef = useRef<SensorDataType[]>([]); // Ref to store the sensor data (accelerometer and location)
+  const [startSensors, setStartSensors] = useState<boolean>(false); // State to track whether sensors should be active
   const [locationPermission, setLocationPermission] = useState<boolean>(false); // State to track location permission status
-
-  const [status, requestPermission] = Location.useForegroundPermissions(); // Location permission hook from expo-location
+  const [appState, setAppState] = useState<AppStateStatus>(
+    AppState.currentState
+  ); // State to monitor the current app state
 
   /**
-   * Requests location permission if it has not been granted yet.
-   * Updates the `locationPermission` state based on the user's decision.
+   * Toggles the state to start or stop the sensors.
    */
-  const requestLocatonPermission = async () => {
-    if (status?.granted) {
-      setLocationPermission(true);
-    } else {
-      const { granted } = await requestPermission();
-      if (granted) {
-        setLocationPermission(true);
-      } else {
-        Alert.alert("Location Permission Denied");
-      }
+  const sensorsController = () => setStartSensors(!startSensors);
+
+  let locationData: Location.LocationObjectCoords | undefined;
+  let accelerationData: AccelerometerDataType | undefined;
+
+  /**
+   * Updates the sensor data by adding the latest accelerometer and/or location reading
+   * to the beginning of the sensor data array. If location permission is granted, location data
+   * is included with the accelerometer data.
+   *
+   * @param {UpdateDataArguments} data - The latest accelerometer and/or location data.
+   */
+  const updateData = ({ acceleration, location }: UpdateDataArguments) => {
+    if (location) {
+      locationData = location; // Update the location data if newer version availabe
+    }
+
+    if (acceleration) {
+      accelerationData = acceleration; // Update the acceleration data if newer version availabe
+    }
+
+    /**
+     * Records data with or without location based on the availability of location permissions.
+     * If location permission is granted, both location and accelerometer data are recorded.
+     * Otherwise, only accelerometer data is recorded.
+     */
+    const recordDataWithLocation =
+      acceleration && locationPermission && locationData;
+    const recordDataWithoutLocation = acceleration && !locationPermission;
+
+    if (recordDataWithLocation || recordDataWithoutLocation) {
+      const timestamp = dateTimeStringWithMilliseconds();
+      const reading = {
+        timestamp,
+        locationData,
+        accelerationData,
+      };
+      sensorDataRef.current.unshift(reading); // Add the new reading to the start of the array
     }
   };
 
-  /** Toggles the start or stop state of the sensors. */
-  const sensorsController = () => setStartSensors(!startSensors);
+  /**
+   * Requests location permission from the user and updates the locationPermission state
+   * based on the user's response.
+   */
+  const requestLocationPermission = async () => {
+    const permissionGranted = await requestLocatonPermissionAsync();
+    setLocationPermission(permissionGranted);
+  };
 
   /**
-   * Updates the accelerometer data by prepending the latest reading to the sensor data array.
-   * Handles the issue of missing `timestamp` on Android by manually adding a timestamp.
+   * Callback function that handles app state changes.
+   * If the app becomes active from an inactive or background state, location permission is requested.
    *
-   * @param {AccelerometerMeasurement} data - The latest accelerometer measurement.
+   * @param {AppStateStatus} nextAppState - The new app state.
    */
-  const updateData = (data: AccelerometerMeasurement) => {
-    /*
-     * The timestamp property in the AccelerometerMeasurement object
-     * consistently returns undefined on Android devices.
-     * To address this issue, we manually add timestamps to ensure accurate timing data.
-     */
-    const timestamp = dateTimeStringWithMilliseconds();
-    const reading = { ...data, timestamp };
-    sensorDataRef.current.unshift(reading); // Add the new reading to the start of the array
+  const appStateCallback = async (nextAppState: AppStateStatus) => {
+    if (appState.match(/inactive|background/) && nextAppState === "active") {
+      await requestLocationPermission();
+    }
+    setAppState(nextAppState);
   };
 
   useEffect(() => {
     // Request location permission if it hasn't been granted yet
-    (async () => !locationPermission && (await requestLocatonPermission()))();
+    (async () => {
+      if (!locationPermission) {
+        await requestLocationPermission();
+      }
+    })();
   }, []);
+
+  /**
+   * Monitors app state changes to update the location permission state
+   * if the user changes location settings while the app is inactive or in the background.
+   */
+  useEffect(() => {
+    const appStateSubscription = AppState.addEventListener(
+      "change",
+      appStateCallback
+    );
+
+    return () => appStateSubscription.remove();
+  }, [appState]);
 
   return (
     <SensorsContext.Provider
       value={{
+        startSensors,
+        locationPermission,
         sensorsData: sensorDataRef.current,
         updateData,
         sensorsController,
-        startSensors,
-        locationPermission,
+        requestLocationPermission,
       }}
     >
       {children}

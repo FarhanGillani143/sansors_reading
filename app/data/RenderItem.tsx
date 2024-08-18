@@ -1,15 +1,29 @@
 import { StyleSheet, Text, View } from "react-native";
-import { AccelerometerDataType } from "../../components/Accelerometer/Accelerometer";
+import { SensorDataType } from "../../utils/DataTypes";
 
-export const renderItem = ({ item }: { item: AccelerometerDataType }) => {
+export const renderItem = ({ item }: { item: SensorDataType }) => {
   return (
     <View style={styles.listItem}>
       <Text>{item.timestamp}</Text>
       <View style={styles.borderline}></View>
       <View style={styles.dataPoints}>
-        <Text>x: {item.x.toFixed(2)}</Text>
-        <Text>y: {item.y.toFixed(2)}</Text>
-        <Text>z: {item.z.toFixed(2)}</Text>
+        <Text>x: {item.accelerationData?.x.toFixed(2)}</Text>
+        <Text>y: {item.accelerationData?.y.toFixed(2)}</Text>
+        <Text>z: {item.accelerationData?.z.toFixed(2)}</Text>
+      </View>
+      <View style={styles.borderline}></View>
+      <View style={styles.dataPoints}>
+        <Text>Altitude: {item.locationData?.altitude?.toFixed(4)}</Text>
+        <Text>Heading: {item.locationData?.heading?.toFixed(4)}</Text>
+      </View>
+      <View style={styles.borderline}></View>
+      <View style={styles.dataPoints}>
+        <Text>Longitude: {item.locationData?.longitude?.toFixed(4)}</Text>
+        <Text>Latitude: {item.locationData?.latitude?.toFixed(4)}</Text>
+      </View>
+      <View style={styles.borderline}></View>
+      <View style={styles.dataPoints}>
+        <Text>Speed: {item.locationData?.speed?.toFixed(3)}</Text>
       </View>
     </View>
   );

@@ -1,12 +1,11 @@
 import React, { useContext } from "react";
 import { Button, StyleSheet, View } from "react-native";
 import { Link } from "expo-router";
-import GPS from "../../components/GPS/GPS";
+
+import { SensorContextType } from "../../utils/DataTypes";
+import { SensorsContext } from "../../context/ContextProvider";
+import LocationTracking from "../../components/Location/LocationTracking";
 import AccelerometerSensor from "../../components/Accelerometer/Accelerometer";
-import {
-  SensorsContext,
-  SensorContextType,
-} from "../../context/ContextProvider";
 
 export default function Home() {
   const { startSensors, sensorsData, sensorsController } =
@@ -30,12 +29,12 @@ export default function Home() {
     <View style={styles.container}>
       <View style={[styles.container, { gap: 10, flex: 3 }]}>
         <AccelerometerSensor />
-        <GPS />
+        <LocationTracking />
       </View>
       <View style={{ flex: 1, gap: 10 }}>
         <Button
           onPress={sensorsController}
-          title={startSensors ? "Stop Measuring" : "Start Measuring"}
+          title={startSensors ? "Stop Tracking" : "Start Tracking"}
         />
         {ViewAllDataButton}
       </View>
