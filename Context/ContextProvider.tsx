@@ -11,6 +11,10 @@ import {
   UpdateDataArguments,
   AccelerometerDataType,
 } from "../utils/DataTypes";
+import {
+  storeTimeIntervalAsync,
+  retrieveTimeIntervalAsync,
+} from "../utils/ManageStorage";
 
 /**
  * Context to manage and provide sensor-related state, including accelerometer and location data.
@@ -19,10 +23,12 @@ import {
 export const SensorsContext = createContext<SensorContextType>({
   sensorsData: [],
   startSensors: false,
+  timeInterval: 200,
   locationPermission: false,
   sensorsController() {},
-  updateData() {},
+  updateSensorsData() {},
   requestLocationPermission() {},
+  async updateTimeIntervalAsync(interval) {},
 });
 
 type PropsType = {
@@ -33,6 +39,7 @@ export default function SensorContextProvider({ children }: PropsType) {
   const sensorDataRef = useRef<SensorDataType[]>([]); // Ref to store the sensor data (accelerometer and location)
   const [startSensors, setStartSensors] = useState<boolean>(false); // State to track whether sensors should be active
   const [locationPermission, setLocationPermission] = useState<boolean>(false); // State to track location permission status
+  const [timeInterval, setTimeInterval] = useState<number>(200);
   const [appState, setAppState] = useState<AppStateStatus>(
     AppState.currentState
   ); // State to monitor the current app state
@@ -41,6 +48,13 @@ export default function SensorContextProvider({ children }: PropsType) {
    * Toggles the state to start or stop the sensors.
    */
   const sensorsController = () => setStartSensors(!startSensors);
+
+  const updateTimeIntervalAsync = async (interval: number) => {
+    setTimeInterval(interval);
+
+    // Store to the app's local storage so we can save the user configuration for time interval
+    await storeTimeIntervalAsync(interval);
+  };
 
   let locationData: Location.LocationObjectCoords | undefined;
   let accelerationData: AccelerometerDataType | undefined;
@@ -52,7 +66,10 @@ export default function SensorContextProvider({ children }: PropsType) {
    *
    * @param {UpdateDataArguments} data - The latest accelerometer and/or location data.
    */
-  const updateData = ({ acceleration, location }: UpdateDataArguments) => {
+  const updateSensorsData = ({
+    acceleration,
+    location,
+  }: UpdateDataArguments) => {
     if (location) {
       locationData = location; // Update the location data if newer version availabe
     }
@@ -90,6 +107,34 @@ export default function SensorContextProvider({ children }: PropsType) {
     setLocationPermission(permissionGranted);
   };
 
+  useEffect(() => {
+    // Request location permission if it hasn't been granted yet
+    (async () => {
+      if (!locationPermission) {
+        await requestLocationPermission();
+      }
+
+      // Retrieve stored time earlier, configured by the user
+      const sensorTimeInterval = await retrieveTimeIntervalAsync();
+      if (sensorTimeInterval) setTimeInterval(sensorTimeInterval);
+    })();
+  }, []);
+
+  useEffect(() => {
+    /**
+     * Async function to manage the screen wake state based on the sensor activity.
+     * If sensors are active, the screen will be kept awake to ensure continuous tracking.
+     * If sensors are inactive, the screen wake state will be deactivated.
+     */
+    (async () => {
+      if (startSensors) {
+        await activateKeepAwakeAsync();
+      } else {
+        deactivateKeepAwake();
+      }
+    })();
+  }, [startSensors]);
+
   /**
    * Callback function that handles app state changes.
    * If the app becomes active from an inactive or background state, location permission is requested.
@@ -102,27 +147,6 @@ export default function SensorContextProvider({ children }: PropsType) {
     }
     setAppState(nextAppState);
   };
-
-  useEffect(() => {
-    // Request location permission if it hasn't been granted yet
-    (async () => {
-      if (!locationPermission) {
-        await requestLocationPermission();
-      }
-    })();
-  }, []);
-
-  useEffect(() => {
-    (async () => {
-      if (startSensors) {
-        console.log("Activated keep screen awake!!!")
-        await activateKeepAwakeAsync();
-      } else {
-        console.log("Deactivated keep screen awake!!!")
-        deactivateKeepAwake();
-      }
-    })();
-  }, [startSensors]);
 
   /**
    * Monitors app state changes to update the location permission state
@@ -141,10 +165,12 @@ export default function SensorContextProvider({ children }: PropsType) {
     <SensorsContext.Provider
       value={{
         startSensors,
+        timeInterval,
         locationPermission,
         sensorsData: sensorDataRef.current,
-        updateData,
         sensorsController,
+        updateSensorsData,
+        updateTimeIntervalAsync,
         requestLocationPermission,
       }}
     >

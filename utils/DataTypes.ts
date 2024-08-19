@@ -1,8 +1,8 @@
 import * as Location from "expo-location";
 import { AccelerometerMeasurement } from "expo-sensors";
 
-/** 
- * Type representing the accelerometer data, excluding the `timestamp` property 
+/**
+ * Type representing the accelerometer data, excluding the `timestamp` property
  * as timestamps will be manually added when tracking the data.
  */
 export type AccelerometerDataType = Omit<AccelerometerMeasurement, "timestamp">;
@@ -17,7 +17,7 @@ export type SensorDataType = {
   locationData: Location.LocationObjectCoords | undefined; // Location data if available
 };
 
-/** 
+/**
  * Arguments type for the function used to update data in the ContextProvider.
  */
 export type UpdateDataArguments = {
@@ -30,9 +30,11 @@ export type UpdateDataArguments = {
  */
 export interface SensorContextType {
   sensorsData: SensorDataType[]; // Array of sensor data records (accelerometer and location)
+  timeInterval: number; // Time interval for sensor data collection.
   locationPermission: boolean; // Flag indicating if location permission has been granted
   startSensors: boolean; // Flag to indicate whether the sensors should be active
   sensorsController: VoidFunction; // Function to toggle the sensor's active state
-  updateData: ({ acceleration, location }: UpdateDataArguments) => void; // Function to update the sensor data in the context
+  updateSensorsData: ({ acceleration, location }: UpdateDataArguments) => void; // Function to update the sensor data in the context
+  updateTimeIntervalAsync: (interval: number) => Promise<void>; // Function to update the time interval asynchronously.
   requestLocationPermission: VoidFunction; // Function to request location permission from the user
 }

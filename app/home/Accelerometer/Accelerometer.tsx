@@ -2,8 +2,8 @@ import { useState, useEffect, useContext } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { Accelerometer } from "expo-sensors";
 
-import { SensorContextType } from "../../utils/DataTypes";
-import { SensorsContext } from "../../context/ContextProvider";
+import { SensorContextType } from "../../../utils/DataTypes";
+import { SensorsContext } from "../../../context/ContextProvider";
 
 export default function AccelerometerSensor() {
   const [isSensorAvailable, setIsSensorAvailable] = useState<boolean>(false);
@@ -15,13 +15,13 @@ export default function AccelerometerSensor() {
   };
 
   /* State to store the current accelerometer readings */
-  const [{ x, y, z }, setData] = useState({
+  const [{ x, y, z }, setCurrentAcceleration] = useState({
     x: 0,
     y: 0,
     z: 0,
   });
 
-  const { startSensors, updateData } =
+  const { startSensors, timeInterval, updateSensorsData } =
     useContext<SensorContextType>(SensorsContext);
 
   /**
@@ -29,7 +29,7 @@ export default function AccelerometerSensor() {
    */
   const stopTracking = () => {
     Accelerometer.removeAllListeners();
-    setData({ x: 0, y: 0, z: 0 });
+    setCurrentAcceleration({ x: 0, y: 0, z: 0 });
   };
 
   /**
@@ -37,22 +37,20 @@ export default function AccelerometerSensor() {
    * to handle accelerometer data updates.
    */
   const startTracking = () => {
-    Accelerometer.setUpdateInterval(200); // Update every 200 milliseconds
+    Accelerometer.setUpdateInterval(timeInterval);
     Accelerometer.addListener((data) => {
-      setData(data);
-      updateData({ acceleration: data }); // Call the external updateData function with the latest data
+      setCurrentAcceleration(data);
+      updateSensorsData({ acceleration: data }); // Call the external updateData function with the latest data
     });
   };
 
   useEffect(() => {
-    // Start or stop the sensor based on the startSensor flag
     if (startSensors) {
       startTracking();
     } else {
       stopTracking();
     }
 
-    // Cleanup function to remove listeners when the component is unmounted or the sensor is stopped
     return () => Accelerometer.removeAllListeners();
   }, [startSensors]);
 
