@@ -5,7 +5,8 @@ import { convertArrayToCSV } from "./ArrayToCSV";
 import { StoreSessionData } from "../types/FunctionTypes";
 
 // Define the file path for storing the sensor time interval in the app's document directory.
-const sensorTimeIntervalUri = FileSystem.documentDirectory + "sensorTimeInterval";
+const sensorTimeIntervalUri =
+  FileSystem.documentDirectory + "sensorTimeInterval";
 
 /**
  * Asynchronously stores the sensor time interval in a file.
@@ -15,7 +16,10 @@ const sensorTimeIntervalUri = FileSystem.documentDirectory + "sensorTimeInterval
  */
 export const storeTimeIntervalAsync = async (interval: number) => {
   try {
-    await FileSystem.writeAsStringAsync(sensorTimeIntervalUri, JSON.stringify(interval));
+    await FileSystem.writeAsStringAsync(
+      sensorTimeIntervalUri,
+      JSON.stringify(interval)
+    );
   } catch (error: any) {
     Alert.alert("Error Saving New Time Interval", error.message);
   }
@@ -29,7 +33,9 @@ export const storeTimeIntervalAsync = async (interval: number) => {
  */
 export const retrieveTimeIntervalAsync = async (): Promise<number | false> => {
   try {
-    const fileContent = await FileSystem.readAsStringAsync(sensorTimeIntervalUri);
+    const fileContent = await FileSystem.readAsStringAsync(
+      sensorTimeIntervalUri
+    );
     return Number(JSON.parse(fileContent));
   } catch (error) {
     return false;
@@ -43,10 +49,15 @@ export const retrieveTimeIntervalAsync = async (): Promise<number | false> => {
  * @param {string[]} sessionNames - The array of session names to be stored.
  * @returns {Promise<boolean>} - Returns `true` if storage is successful, otherwise `false`.
  */
-export const storeSessionNames = async (sessionNames: string[]): Promise<boolean> => {
+export const storeSessionNames = async (
+  sessionNames: string[]
+): Promise<boolean> => {
   const sessionNamesUri = FileSystem.documentDirectory + "sessionNames";
   try {
-    await FileSystem.writeAsStringAsync(sessionNamesUri, JSON.stringify(sessionNames));
+    await FileSystem.writeAsStringAsync(
+      sessionNamesUri,
+      JSON.stringify(sessionNames)
+    );
     return true;
   } catch (error: any) {
     Alert.alert("Error Storing Session Names", error.message);
@@ -71,13 +82,24 @@ export const retrieveSessionNames = async (): Promise<string[] | false> => {
 
 /**
  * Sanitizes a filename by replacing disallowed characters with a hyphen (-).
- * This is necessary because special characters cannot be part of a file name or file path.
+ * It further refines the filename to make it more human-readable by replacing
+ * consecutive hyphens with a comma and adjusting the output for easier recognition.
  *
- * @param {string} filename - The original filename to be sanitized.
- * @returns {string} - The sanitized filename.
+ * This sanitization is necessary as certain special characters are not allowed
+ * in file names or file paths across different operating systems.
+ *
+ * @param {string} filename - The original filename that needs to be sanitized.
+ * @returns {string} - The sanitized and human-readable filename.
  */
 function sanitizeFilename(filename: string): string {
-  return filename.replace(/[/\\?%*:,|"<> ]/g, "-");
+  // Replace invalid characters with a hyphen
+  let sanitizedName = filename.replace(/[/\\?%*:,|"<> ]/g, "-");
+
+  // Replace consecutive hyphens ("--") with a comma (",") for readability
+  sanitizedName = sanitizedName.replaceAll(/--/g, ",");
+
+  // Replace any remaining occurrences of ",-" with "__" to clean up the result
+  return sanitizedName.replace(/,-/g, "__");
 }
 
 /**
@@ -87,7 +109,9 @@ function sanitizeFilename(filename: string): string {
  * @param {StoreSessionData} session - The session data to be stored, including the session name and sensor data.
  * @returns {Promise<boolean>} - Returns `true` if storage is successful, otherwise `false`.
  */
-export const storeSessionData = async (session: StoreSessionData): Promise<boolean> => {
+export const storeSessionData = async (
+  session: StoreSessionData
+): Promise<boolean> => {
   const fileName = sanitizeFilename(session.sessionName);
   const sessionDataUri = FileSystem.documentDirectory + fileName + ".csv"; // Adding .csv because we're storing file in CSV format
 
