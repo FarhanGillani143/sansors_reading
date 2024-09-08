@@ -25,9 +25,18 @@ export default function Home() {
    *
    * @returns {boolean} - Returns true if the button should be displayed, false otherwise.
    */
-  const buttonCheck = () => !startSensors && sensorsData.length > 0;
+  const dataButtonCheck = () => !startSensors && sensorsData.length > 0;
 
-  const buttonTitle = `View All Readings (${sensorsData.length})`;
+  /**
+   * Checks whether the "View All Sessions" button should be displayed.
+   * This button is shown only when sensor tracking is not active (startSensors is false)
+   * and there are recorded sessions available.
+   *
+   * @returns {boolean} - Returns true if the button should be displayed, false otherwise.
+   */
+  const historyButtonCheck = () => !startSensors && allSessions.length > 0;
+
+  const buttonTitle = `View This Session's Readings (${sensorsData.length})`;
 
   return (
     <View style={styles.container}>
@@ -53,11 +62,11 @@ export default function Home() {
             title={startSensors ? "Stop Tracking" : "Start Tracking"}
           />
         )}
-        {buttonCheck() && (
+        {dataButtonCheck() && (
           <NavigationButton title={buttonTitle} navigateTo="/data" />
         )}
 
-        {allSessions.length > 0 && (
+        {historyButtonCheck() && (
           <NavigationButton title="View All Sessions" navigateTo="/history" />
         )}
       </View>
@@ -74,7 +83,7 @@ const styles = StyleSheet.create({
   },
   buttons: {
     flex: 1,
-    gap: 15,
+    gap: 10,
     alignItems: "center",
   },
 });

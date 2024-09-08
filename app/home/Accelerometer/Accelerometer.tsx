@@ -61,9 +61,9 @@ export default function AccelerometerSensor() {
           <Text style={styles.title}>
             Acceleration (in gs where 1g = 9.81 m/s^2)
           </Text>
-          <Text>x: {x.toFixed(2)}</Text>
-          <Text>y: {y.toFixed(2)}</Text>
-          <Text>z: {z.toFixed(2)}</Text>
+          <Text>x: {x.toFixed(2)} gs</Text>
+          <Text>y: {y.toFixed(2)} gs</Text>
+          <Text>z: {z.toFixed(2)} gs</Text>
         </View>
       ) : (
         <Text>Accelerometer sensor is not available on this device</Text>

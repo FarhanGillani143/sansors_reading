@@ -18,16 +18,16 @@ import { SensorDataType } from "../types/DataTypes";
 export function convertArrayToCSV(arr: SensorDataType[]) {
   const headers = [
     "Timestamp",
-    "X",
-    "Y",
-    "Z",
-    "Altitude",
-    "Altitude Accuracy",
-    "Heading",
-    "Accuracy",
-    "Latitude",
-    "Longitude",
-    "Speed",
+    "X (gs where 1g = 9.81 m/s^2)",
+    "Y (gs where 1g = 9.81 m/s^2)",
+    "Z (gs where 1g = 9.81 m/s^2)",
+    "Altitude (m)",
+    "Altitude Accuracy (m)",
+    "Heading (° from north)",
+    "Accuracy (m)",
+    "Latitude (°)",
+    "Longitude (°)",
+    "Speed (km/h)",
   ];
 
   const rows = arr.map(

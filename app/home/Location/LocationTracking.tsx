@@ -1,7 +1,6 @@
 import { useContext, useEffect, useState } from "react";
-import { Button, StyleSheet, Text, View } from "react-native";
+import { Button, StyleSheet, Text, View, Alert } from "react-native";
 import * as Location from "expo-location";
-
 import {
   SensorsContext,
   SensorContextType,
@@ -34,8 +33,15 @@ export default function LocationTracking() {
     useState<Location.LocationObjectCoords>(emptyPositionObject);
 
   const watchPositionCallback = (position: Location.LocationObject) => {
-    setCurrentPosition(position.coords);
-    updateSensorsData({ location: position.coords });
+    // Convert speed from m/s to km/h
+    const speed =
+      position.coords.speed && position.coords.speed != -1
+        ? position.coords.speed * 3.6
+        : 0;
+    setCurrentPosition({ ...position.coords, speed });
+    updateSensorsData({
+      location: { ...position.coords, speed },
+    });
   };
 
   // Configuration for Location.watchPositionAsync
@@ -50,20 +56,26 @@ export default function LocationTracking() {
 
     (async () => {
       if (locationPermission && startSensors) {
-        // Start tracking the position if permission is granted and sensors are active
-        subscription = await Location.watchPositionAsync(
-          watchPositionConfig,
-          watchPositionCallback
-        );
+        try {
+          // Start tracking the position if permission is granted and sensors are active
+          subscription = await Location.watchPositionAsync(
+            watchPositionConfig,
+            watchPositionCallback
+          );
+        } catch (error) {
+          Alert.alert("Error", "Unable to track location.");
+        }
       } else {
         // Stop tracking the position and reset the position state if sensors are stopped or permission is denied
-        subscription && subscription.remove();
+        if (subscription) subscription.remove();
         setCurrentPosition(emptyPositionObject);
       }
     })();
 
     // Clean up the subscription when the component unmounts or dependencies change
-    return () => subscription && subscription.remove();
+    return () => {
+      if (subscription) subscription.remove();
+    };
   }, [startSensors, locationPermission]);
 
   return (
@@ -71,11 +83,13 @@ export default function LocationTracking() {
       {locationPermission ? (
         <View style={styles.container}>
           <Text style={styles.title}>Location Tracking</Text>
-          <Text>Altitude: {currentPosition.altitude?.toFixed(4)}</Text>
-          <Text>Latitude: {currentPosition.latitude.toFixed(4)}</Text>
-          <Text>Longitude: {currentPosition.longitude.toFixed(4)}</Text>
-          <Text>Heading: {currentPosition.heading?.toFixed(2)}</Text>
-          <Text>Speed: {currentPosition.speed?.toFixed(2)}</Text>
+          <Text>
+            Heading: {currentPosition.heading?.toFixed(2)}° from north
+          </Text>
+          <Text>Latitude: {currentPosition.latitude.toFixed(4)}°</Text>
+          <Text>Longitude: {currentPosition.longitude.toFixed(4)}°</Text>
+          <Text>Altitude: {currentPosition.altitude?.toFixed(2)}m</Text>
+          <Text>Speed: {currentPosition.speed?.toFixed(2)} km/h</Text>
         </View>
       ) : (
         <View style={styles.container}>
