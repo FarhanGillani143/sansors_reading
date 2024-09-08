@@ -1,10 +1,11 @@
 import { useContext, useEffect, useState } from "react";
 import { Button, StyleSheet, Text, View, Alert } from "react-native";
 import * as Location from "expo-location";
+
 import {
   SensorsContext,
   SensorContextType,
-} from "../../../context/SensorContext";
+} from "../../../tempContext/SensorContext";
 
 /**
  * Default position object used to reset the position state

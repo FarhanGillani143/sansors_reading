@@ -5,7 +5,7 @@ import LocationTracking from "./Location/LocationTracking";
 import AccelerometerSensor from "./Accelerometer/Accelerometer";
 import NavigationButton from "../../components/NavigationButton";
 import SensorTimeInterval from "./SensorTimeInterval/SensorTimeInterval";
-import { SensorContextType, SensorsContext } from "../../context/SensorContext";
+import { SensorContextType, SensorsContext } from "../../tempContext/SensorContext";
 
 export default function Home() {
   const {

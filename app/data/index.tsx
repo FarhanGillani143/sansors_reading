@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, FlatList, Button } from "react-native";
 
 import { renderItem } from "./RenderItem";
 import { downloadCSV } from "../../utils/ArrayToCSV";
-import { SensorContextType, SensorsContext } from "../../context/SensorContext";
+import { SensorContextType, SensorsContext } from "../../tempContext/SensorContext";
 
 const EmptyListComponent = (
   <View style={{ alignItems: "center" }}>
