@@ -1,59 +1,86 @@
-import React, { createContext, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { AppState, AppStateStatus } from "react-native";
 import * as Location from "expo-location";
+import { Accelerometer } from "expo-sensors";
 import { activateKeepAwakeAsync, deactivateKeepAwake } from "expo-keep-awake";
 
+import { SensorsContext } from "./SensorContext";
+import { UpdateSensorsData } from "../types/FunctionTypes";
 import dateTimeStringWithMilliseconds from "../utils/dateTimeStringwithMs";
 import { requestLocatonPermissionAsync } from "../utils/LocationPermission";
+import { SensorDataType, AccelerometerDataType } from "../types/DataTypes";
 import {
-  SensorDataType,
-  SensorContextType,
-  UpdateDataArguments,
-  AccelerometerDataType,
-} from "../utils/DataTypes";
-import {
+  storeSessionData,
+  storeSessionNames,
+  retrieveSessionNames,
   storeTimeIntervalAsync,
   retrieveTimeIntervalAsync,
 } from "../utils/ManageStorage";
-
-/**
- * Context to manage and provide sensor-related state, including accelerometer and location data.
- * The context offers functions to control sensors and update their data, and initializes with default values.
- */
-export const SensorsContext = createContext<SensorContextType>({
-  sensorsData: [],
-  startSensors: false,
-  timeInterval: 200,
-  locationPermission: false,
-  sensorsController() {},
-  updateSensorsData() {},
-  requestLocationPermission() {},
-  async updateTimeIntervalAsync(interval) {},
-});
 
 type PropsType = {
   children: JSX.Element | JSX.Element[];
 };
 
 export default function SensorContextProvider({ children }: PropsType) {
-  const sensorDataRef = useRef<SensorDataType[]>([]); // Ref to store the sensor data (accelerometer and location)
-  const [startSensors, setStartSensors] = useState<boolean>(false); // State to track whether sensors should be active
-  const [locationPermission, setLocationPermission] = useState<boolean>(false); // State to track location permission status
-  const [timeInterval, setTimeInterval] = useState<number>(200);
+  const sensorDataRef = useRef<SensorDataType[]>([]); // Ref to store sensor data (accelerometer and location).
+  const [locationPermission, setLocationPermission] = useState<boolean>(false); // State to track location permission status.
+  const [sessionEndTime, setSessionEndTime] = useState<Date>(); // State to track the session end time.
+  const [sessionStartTime, setSessionStartTime] = useState<Date>(); // State to track the session start time.
+  const [isAccelerometerAvailable, setIsAccelerometerAvailable] =
+    useState<boolean>(false);
   const [appState, setAppState] = useState<AppStateStatus>(
     AppState.currentState
-  ); // State to monitor the current app state
+  ); // State to monitor the current app state.
+
+  /** State to track whether sensors should be active */
+  const [startSensors, setStartSensors] = useState<boolean>(false);
+
+  /** Time interval property for sensors */
+  const [timeInterval, setTimeInterval] = useState<number>(200);
+
+  /** Contains names of all the sessions recorded so far */
+  const [allSessions, setAllSessions] = useState<string[]>([]);
 
   /**
    * Toggles the state to start or stop the sensors.
+   * If sensors are stopped, it stores the session data and updates the session history.
    */
-  const sensorsController = () => setStartSensors(!startSensors);
+  const sensorsController = async () => {
+    const timeNow = new Date();
+    if (startSensors) {
+      setStartSensors(false);
+      setSessionEndTime(timeNow);
 
+      /** Generate a session name using start and end times for easy identification */
+      const sessionName =
+        sessionStartTime?.toLocaleString() + " - " + timeNow.toLocaleString();
+
+      setAllSessions((previousState) => [sessionName, ...previousState]);
+
+      // Store the session's data and update session names if successful.
+      const isStored = await storeSessionData({
+        sessionName,
+        sensorsData: sensorDataRef.current,
+      });
+
+      if (isStored) {
+        await storeSessionNames([sessionName, ...allSessions]);
+      }
+    } else {
+      sensorDataRef.current = []; // Clear previous session data when starting a new session.
+      setStartSensors(true);
+      setSessionStartTime(timeNow);
+    }
+  };
+
+  /**
+   * Updates the time interval for sensor data collection and stores it locally.
+   *
+   * @param {number} interval - The new time interval to be set.
+   */
   const updateTimeIntervalAsync = async (interval: number) => {
     setTimeInterval(interval);
-
-    // Store to the app's local storage so we can save the user configuration for time interval
-    await storeTimeIntervalAsync(interval);
+    await storeTimeIntervalAsync(interval); // Persist the interval setting for future sessions.
   };
 
   let locationData: Location.LocationObjectCoords | undefined;
@@ -61,40 +88,45 @@ export default function SensorContextProvider({ children }: PropsType) {
 
   /**
    * Updates the sensor data by adding the latest accelerometer and/or location reading
-   * to the beginning of the sensor data array. If location permission is granted, location data
-   * is included with the accelerometer data.
+   * to the beginning of the sensor data array.
    *
-   * @param {UpdateDataArguments} data - The latest accelerometer and/or location data.
+   * @param {UpdateSensorsData} data - The latest accelerometer and/or location data.
    */
-  const updateSensorsData = ({
-    acceleration,
-    location,
-  }: UpdateDataArguments) => {
+  const updateSensorsData = ({ acceleration, location }: UpdateSensorsData) => {
     if (location) {
-      locationData = location; // Update the location data if newer version availabe
+      locationData = location; // Update the location data if available.
     }
 
     if (acceleration) {
-      accelerationData = acceleration; // Update the acceleration data if newer version availabe
+      accelerationData = acceleration; // Update the acceleration data if available.
     }
 
     /**
-     * Records data with or without location based on the availability of location permissions.
-     * If location permission is granted, both location and accelerometer data are recorded.
-     * Otherwise, only accelerometer data is recorded.
+     * Record data based on location permission status.
+     * If location permission is granted, record both location and accelerometer data.
+     * Otherwise, record only accelerometer data.
      */
     const recordDataWithLocation =
       acceleration && locationPermission && locationData;
     const recordDataWithoutLocation = acceleration && !locationPermission;
+    const recordDataWithoutAcceleration =
+      locationPermission && locationData && !isAccelerometerAvailable;
 
-    if (recordDataWithLocation || recordDataWithoutLocation) {
+    /** Doing all these checks because we want to record data of all the sensors in
+     * a sync if all the sensors are available
+     */
+    if (
+      recordDataWithLocation ||
+      recordDataWithoutLocation ||
+      recordDataWithoutAcceleration
+    ) {
       const timestamp = dateTimeStringWithMilliseconds();
       const reading = {
         timestamp,
         locationData,
         accelerationData,
       };
-      sensorDataRef.current.unshift(reading); // Add the new reading to the start of the array
+      sensorDataRef.current.unshift(reading); // Add the new reading to the start of the array.
     }
   };
 
@@ -107,24 +139,36 @@ export default function SensorContextProvider({ children }: PropsType) {
     setLocationPermission(permissionGranted);
   };
 
+  /** Verifies the availability of the sensor on the device. */
+  const checkAccelerometerAvailability = async () => {
+    const isAvailable = await Accelerometer.isAvailableAsync();
+    setIsAccelerometerAvailable(isAvailable);
+  };
+
   useEffect(() => {
-    // Request location permission if it hasn't been granted yet
+    /**
+     * On component mount, request location permission if not already granted,
+     * retrieve the stored time interval, and load session names from storage.
+     */
     (async () => {
+      await checkAccelerometerAvailability();
+
       if (!locationPermission) {
         await requestLocationPermission();
       }
 
-      // Retrieve stored time earlier, configured by the user
       const sensorTimeInterval = await retrieveTimeIntervalAsync();
       if (sensorTimeInterval) setTimeInterval(sensorTimeInterval);
+
+      const sessionNames = await retrieveSessionNames();
+      if (sessionNames) setAllSessions(sessionNames);
     })();
   }, []);
 
   useEffect(() => {
     /**
-     * Async function to manage the screen wake state based on the sensor activity.
-     * If sensors are active, the screen will be kept awake to ensure continuous tracking.
-     * If sensors are inactive, the screen wake state will be deactivated.
+     * Manages the screen wake state based on the sensor activity.
+     * Keeps the screen awake if sensors are active to ensure continuous tracking.
      */
     (async () => {
       if (startSensors) {
@@ -137,9 +181,8 @@ export default function SensorContextProvider({ children }: PropsType) {
 
   /**
    * Callback function that handles app state changes.
-   * If the app becomes active from an inactive or background state, location permission is requested.
-   *
-   * @param {AppStateStatus} nextAppState - The new app state.
+   * Requests location permission if the app becomes active from an inactive
+   * or background state.
    */
   const appStateCallback = async (nextAppState: AppStateStatus) => {
     if (appState.match(/inactive|background/) && nextAppState === "active") {
@@ -149,8 +192,8 @@ export default function SensorContextProvider({ children }: PropsType) {
   };
 
   /**
-   * Monitors app state changes to update the location permission state
-   * if the user changes location settings while the app is inactive or in the background.
+   * Monitors app state changes to update the location permission state if the
+   * user changes location settings while the app is inactive or in the background.
    */
   useEffect(() => {
     const appStateSubscription = AppState.addEventListener(
@@ -158,16 +201,21 @@ export default function SensorContextProvider({ children }: PropsType) {
       appStateCallback
     );
 
-    return () => appStateSubscription.remove();
+    return () => appStateSubscription.remove(); // Cleanup the listener on unmount.
   }, [appState]);
 
   return (
     <SensorsContext.Provider
       value={{
+        allSessions,
         startSensors,
         timeInterval,
+        sessionEndTime,
+        sessionStartTime,
         locationPermission,
+        isAccelerometerAvailable,
         sensorsData: sensorDataRef.current,
+        noSensorAvailable: !locationPermission && !isAccelerometerAvailable,
         sensorsController,
         updateSensorsData,
         updateTimeIntervalAsync,

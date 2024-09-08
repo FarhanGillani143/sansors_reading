@@ -8,8 +8,10 @@ import {
   StyleSheet,
 } from "react-native";
 
-import { SensorContextType } from "../../../utils/DataTypes";
-import { SensorsContext } from "../../../context/ContextProvider";
+import {
+  SensorsContext,
+  SensorContextType,
+} from "../../../context/SensorContext";
 
 export default function SensorTimeInterval() {
   const { timeInterval, updateTimeIntervalAsync } =

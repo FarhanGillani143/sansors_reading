@@ -1,7 +1,7 @@
 import { Alert } from "react-native";
 import * as Sharing from "expo-sharing";
 import * as FileSystem from "expo-file-system";
-import { SensorDataType } from "./DataTypes";
+import { SensorDataType } from "../types/DataTypes";
 
 /**
  * Converts an array of sensor measurement objects into a CSV-formatted string.

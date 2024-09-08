@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from "react-native";
-import { SensorDataType } from "../../utils/DataTypes";
+import { SensorDataType } from "../../types/DataTypes";
 
 export const renderItem = ({ item }: { item: SensorDataType }) => {
   return (

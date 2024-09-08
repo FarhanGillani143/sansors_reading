@@ -2,18 +2,12 @@ import { useState, useEffect, useContext } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { Accelerometer } from "expo-sensors";
 
-import { SensorContextType } from "../../../utils/DataTypes";
-import { SensorsContext } from "../../../context/ContextProvider";
+import {
+  SensorsContext,
+  SensorContextType,
+} from "../../../context/SensorContext";
 
 export default function AccelerometerSensor() {
-  const [isSensorAvailable, setIsSensorAvailable] = useState<boolean>(false);
-
-  /** Verifies the availability of the sensor on the device. */
-  const checkSensorAvailability = async () => {
-    const isAvailable = await Accelerometer.isAvailableAsync();
-    setIsSensorAvailable(isAvailable);
-  };
-
   /* State to store the current accelerometer readings */
   const [{ x, y, z }, setCurrentAcceleration] = useState({
     x: 0,
@@ -21,8 +15,12 @@ export default function AccelerometerSensor() {
     z: 0,
   });
 
-  const { startSensors, timeInterval, updateSensorsData } =
-    useContext<SensorContextType>(SensorsContext);
+  const {
+    startSensors,
+    timeInterval,
+    updateSensorsData,
+    isAccelerometerAvailable,
+  } = useContext<SensorContextType>(SensorsContext);
 
   /**
    * Stops tracking by removing all accelerometer listeners and resetting state.
@@ -45,22 +43,20 @@ export default function AccelerometerSensor() {
   };
 
   useEffect(() => {
-    if (startSensors) {
-      startTracking();
-    } else {
-      stopTracking();
+    if (isAccelerometerAvailable) {
+      if (startSensors) {
+        startTracking();
+      } else {
+        stopTracking();
+      }
     }
 
     return () => Accelerometer.removeAllListeners();
-  }, [startSensors]);
-
-  useEffect(() => {
-    checkSensorAvailability();
-  }, []);
+  }, [startSensors, isAccelerometerAvailable]);
 
   return (
     <View style={styles.container}>
-      {isSensorAvailable ? (
+      {isAccelerometerAvailable ? (
         <View style={styles.dataPoints}>
           <Text style={styles.title}>
             Acceleration (in gs where 1g = 9.81 m/s^2)

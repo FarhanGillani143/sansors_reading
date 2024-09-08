@@ -1,16 +1,22 @@
 import React, { useContext } from "react";
-import { View, Button, StyleSheet } from "react-native";
-import { Link } from "expo-router";
+import { Text, View, Button, StyleSheet } from "react-native";
 
-import { SensorContextType } from "../../utils/DataTypes";
 import LocationTracking from "./Location/LocationTracking";
-import { SensorsContext } from "../../context/ContextProvider";
 import AccelerometerSensor from "./Accelerometer/Accelerometer";
+import NavigationButton from "../../components/NavigationButton";
 import SensorTimeInterval from "./SensorTimeInterval/SensorTimeInterval";
+import { SensorContextType, SensorsContext } from "../../context/SensorContext";
 
 export default function Home() {
-  const { startSensors, sensorsData, sensorsController } =
-    useContext<SensorContextType>(SensorsContext);
+  const {
+    sensorsData,
+    allSessions,
+    startSensors,
+    sessionEndTime,
+    sessionStartTime,
+    noSensorAvailable,
+    sensorsController,
+  } = useContext<SensorContextType>(SensorsContext);
 
   /**
    * Checks whether the "View All Readings" button should be displayed.
@@ -21,14 +27,7 @@ export default function Home() {
    */
   const buttonCheck = () => !startSensors && sensorsData.length > 0;
 
-  /**
-   * A component that renders a link to the data viewing page.
-   */
-  const ViewAllDataButton = () => (
-    <Link href={"/data"} style={{ color: "#007AFF", fontSize: 18 }}>
-      {`View All Readings (${sensorsData.length})`}
-    </Link>
-  );
+  const buttonTitle = `View All Readings (${sensorsData.length})`;
 
   return (
     <View style={styles.container}>
@@ -38,12 +37,29 @@ export default function Home() {
         <LocationTracking />
       </View>
 
+      <View style={{ gap: 10, paddingVertical: 20 }}>
+        {sessionStartTime && (
+          <Text>Session Started at: {sessionStartTime.toLocaleString()}</Text>
+        )}
+        {sessionEndTime && !startSensors && (
+          <Text>Session Ended at: {sessionEndTime.toLocaleString()}</Text>
+        )}
+      </View>
+
       <View style={styles.buttons}>
-        <Button
-          onPress={sensorsController}
-          title={startSensors ? "Stop Tracking" : "Start Tracking"}
-        />
-        {buttonCheck() && <ViewAllDataButton />}
+        {!noSensorAvailable && (
+          <Button
+            onPress={sensorsController}
+            title={startSensors ? "Stop Tracking" : "Start Tracking"}
+          />
+        )}
+        {buttonCheck() && (
+          <NavigationButton title={buttonTitle} navigateTo="/data" />
+        )}
+
+        {allSessions.length > 0 && (
+          <NavigationButton title="View All Sessions" navigateTo="/history" />
+        )}
       </View>
     </View>
   );
@@ -58,6 +74,7 @@ const styles = StyleSheet.create({
   },
   buttons: {
     flex: 1,
-    gap: 10,
+    gap: 15,
+    alignItems: "center",
   },
 });
