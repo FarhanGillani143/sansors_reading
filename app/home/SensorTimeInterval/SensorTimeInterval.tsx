@@ -11,7 +11,7 @@ import {
 import {
   SensorsContext,
   SensorContextType,
-} from "../../../tempContext/SensorContext";
+} from "../../../context/SensorContext";
 
 export default function SensorTimeInterval() {
   const { timeInterval, updateTimeIntervalAsync } =

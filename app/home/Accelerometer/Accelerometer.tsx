@@ -5,7 +5,7 @@ import { Accelerometer } from "expo-sensors";
 import {
   SensorsContext,
   SensorContextType,
-} from "../../../tempContext/SensorContext";
+} from "../../../context/SensorContext";
 
 export default function AccelerometerSensor() {
   /* State to store the current accelerometer readings */

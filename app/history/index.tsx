@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { Button, FlatList, StyleSheet, Text, View } from "react-native";
 
 import { retrieveSessionData } from "../../utils/ManageStorage";
-import { SensorContextType, SensorsContext } from "../../tempContext/SensorContext";
+import { SensorContextType, SensorsContext } from "../../context/SensorContext";
 
 export default function SessionHistory() {
   const { allSessions } = useContext<SensorContextType>(SensorsContext);

@@ -5,7 +5,7 @@ import * as Location from "expo-location";
 import {
   SensorsContext,
   SensorContextType,
-} from "../../../tempContext/SensorContext";
+} from "../../../context/SensorContext";
 
 /**
  * Default position object used to reset the position state

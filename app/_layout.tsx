@@ -1,5 +1,5 @@
 import { Stack } from "expo-router";
-import SensorContextProvider from "../tempContext/ContextProvider";
+import SensorContextProvider from "../context/ContextProvider";
 
 export default function _layout() {
   return (
