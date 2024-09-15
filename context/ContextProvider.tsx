@@ -121,7 +121,9 @@ export default function SensorContextProvider({ children }: PropsType) {
       recordDataWithoutAcceleration
     ) {
       const timestamp = dateTimeStringWithMilliseconds();
+      const timeDateObject = new Date();
       const reading = {
+        timeDateObject,
         timestamp,
         locationData,
         accelerationData,

@@ -12,6 +12,7 @@ export type AccelerometerDataType = Omit<AccelerometerMeasurement, "timestamp">;
  * accelerometer data, and optional location data.
  */
 export type SensorDataType = {
+  timeDateObject: Date; // To access actual date object
   timestamp: string; // Manually added timestamp in string format
   accelerationData: AccelerometerDataType | undefined; // Accelerometer data without timestamp
   locationData: Location.LocationObjectCoords | undefined; // Location data if available

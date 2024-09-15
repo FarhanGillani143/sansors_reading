@@ -40,7 +40,7 @@ export default function Home() {
 
   return (
     <View style={styles.container}>
-      <SensorTimeInterval />
+      {/* <SensorTimeInterval /> */}
       <View style={[styles.container, { gap: 10, flex: 3 }]}>
         <AccelerometerSensor />
         <LocationTracking />
@@ -69,6 +69,7 @@ export default function Home() {
         {historyButtonCheck() && (
           <NavigationButton title="View All Sessions" navigateTo="/history" />
         )}
+        <NavigationButton title="View Graph" navigateTo="/graphs" />
       </View>
     </View>
   );
