@@ -16,7 +16,7 @@ export default function _layout() {
           name="history/index"
           options={{ title: "Session History" }}
         />
-        <Stack.Screen name="graphs/index" options={{ title: "D3js Line" }} />
+        <Stack.Screen name="graphs/index" options={{ title: "Graph" }} />
       </Stack>
     </SensorContextProvider>
   );
