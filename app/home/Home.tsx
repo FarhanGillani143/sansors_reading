@@ -40,13 +40,13 @@ export default function Home() {
 
   return (
     <View style={styles.container}>
-      {/* <SensorTimeInterval /> */}
-      <View style={[styles.container, { gap: 10, flex: 3 }]}>
+      <SensorTimeInterval />
+      <View style={[styles.container, { gap: 10, flex: 2 }]}>
         <AccelerometerSensor />
         <LocationTracking />
       </View>
 
-      <View style={{ gap: 10, paddingVertical: 20 }}>
+      <View style={{ gap: 10, paddingVertical: 10 }}>
         {sessionStartTime && (
           <Text>Session Started at: {sessionStartTime.toLocaleString()}</Text>
         )}
@@ -63,13 +63,15 @@ export default function Home() {
           />
         )}
         {dataButtonCheck() && (
-          <NavigationButton title={buttonTitle} navigateTo="/data" />
+          <>
+            <NavigationButton title={buttonTitle} navigateTo="/data" />
+            <NavigationButton title="View Graph" navigateTo="/graphs" />
+          </>
         )}
 
         {historyButtonCheck() && (
           <NavigationButton title="View All Sessions" navigateTo="/history" />
         )}
-        <NavigationButton title="View Graph" navigateTo="/graphs" />
       </View>
     </View>
   );
