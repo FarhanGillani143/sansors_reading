@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-import AccelerationGraph from "./AccelerationGraph";
+import AccelerationGraph from "./Acceleration/Graph";
 import { SensorContextType, SensorsContext } from "../../context/SensorContext";
 
 export default function index() {
