@@ -36,7 +36,8 @@ export function generateAccelerationCurves({
   // Create a y-scale to map acceleration values to pixel positions on the y-axis
   const yAxisScale = scaleLinear()
     .domain([minValue, maxValue]) // Set domain to cover the range of acceleration values
-    .range(yAxisRange); // Map the domain to the y-axis pixel range
+    .range(yAxisRange) // Map the domain to the y-axis pixel range
+    .clamp(true)
 
   // Identify the time range of the sensor data session
   const sessionEndTime = sensorsData[0].timeDateObject; // Most recent timestamp
@@ -64,7 +65,7 @@ export function generateAccelerationCurves({
   // Generate labels for the x-axis ticks based on time intervals
   const yAxisLabels = Array.from(
     { length: 6 }, // Total number of labels
-    (_, i) => (minValue + i * yTickInterval).toFixed(1)
+    (_, i) => (minValue + i * yTickInterval).toFixed(2)
   ); // Create labels at each interval
 
   // Create a smooth line path for the X-axis acceleration data
