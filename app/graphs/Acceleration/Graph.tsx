@@ -30,6 +30,10 @@ interface Props {
  *
  * The graph includes X, Y, and Z acceleration curves, along with labels and grid lines.
  * It dynamically updates based on incoming sensor data, displaying a rolling view of the most recent readings.
+ * Component to render a graph that visualizes real-time accelerometer data.
+ *
+ * The graph includes X, Y, and Z acceleration curves, along with labels and grid lines.
+ * It dynamically updates based on incoming sensor data, displaying a rolling view of the most recent readings.
  *
  * @param {Props} props - Component props.
  * @param {number} props.initialMaxValue - The initial maximum value for the y-axis scaling.
@@ -95,24 +99,22 @@ export default function AccelerationGraph(props: Props) {
   return (
     <View style={styles.container}>
       {startSensors && <AccelerometerSensor />}
-      <GraphDetails /> {/* Render additional graph details */}
+      <GraphDetails />
       {graphData && (
         <Svg
-          width={SVG_WIDTH} // Set SVG width for the graph
-          height={SVG_HEIGHT} // Set SVG height for the graph
-          style={{ alignItems: "center" }} // Center align the graph
+          width={SVG_WIDTH}
+          height={SVG_HEIGHT}
+          style={{ alignItems: "center" }}
         >
-          {graphData.xAxisLabels.map(xAxisData)}{" "}
-          {/* Render x-axis labels & gridlines */}
-          {graphData.yAxisLabels.map(yAxisData)}{" "}
-          {/* Render y-axis labels & gridlines*/}
+          {graphData.xAxisLabels.map(xAxisData)}
+          {graphData.yAxisLabels.map(yAxisData)}
           <DateLabel sensorData={sensorsData[0]} />
-          {/* Render the X, Y, Z acceleration curves */}
+
           <G strokeWidth={2} fill={"none"}>
             {graphData.accelerationCurves.length > 0 &&
               graphData.accelerationCurves.map(
                 ({ curve, color }, index) =>
-                  curve && <Path key={index} d={curve} stroke={color} /> // Render each curve (X, Y, Z axes)
+                  curve && <Path key={index} d={curve} stroke={color} />
               )}
           </G>
         </Svg>
