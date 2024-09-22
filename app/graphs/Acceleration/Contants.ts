@@ -20,6 +20,9 @@ const SVG_WIDTH = Dimensions.get("window").width;
 const GRAPH_HEIGHT = SVG_HEIGHT - MARGIN_BOTTOM; // Margin for labels at the bottom
 const GRAPH_WIDTH = SVG_WIDTH - MARGIN_RIGHT; // Margin for graph on the right
 
+const X_AXIS_RANGE = [MARGIN_LEFT, GRAPH_WIDTH];
+const Y_AXIS_RANGE = [GRAPH_HEIGHT, MARGIN_TOP];
+
 export {
   Y_AXIS_COLOR,
   X_AXIS_COLOR,
@@ -34,4 +37,6 @@ export {
   SVG_HEIGHT,
   GRAPH_WIDTH,
   GRAPH_HEIGHT,
+  X_AXIS_RANGE,
+  Y_AXIS_RANGE,
 };

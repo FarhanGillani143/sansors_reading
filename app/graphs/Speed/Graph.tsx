@@ -18,21 +18,21 @@ import {
   Y_AXIS_COLOR,
   SPEED_COLOR,
 } from "./Contants";
-import { generateSpeedCurve } from "../../../utils/SpeedCurve";
+import { generateSpeedCurve } from "../../../utils/Graphs/SpeedCurve";
 
 /**
- * Renders a graph displaying acceleration data from sensors.
+ * Renders a graph displaying speed data from sensors.
  *
- * @returns {JSX.Element} A view containing an SVG graph with X and Y axes and curves representing acceleration data.
+ * @returns {JSX.Element} A view containing an SVG graph with X and Y axes and a curve representing speed data.
  */
 export default function SpeedGraph() {
   const { sensorsData } = useContext<SensorContextType>(SensorsContext);
 
-  // Generate graph data for rendering based on sensor data
+  // Access sensor data (assumed to be an array of objects) from the context
   const graph = generateSpeedCurve({
     sensorsData: sensorsData,
-    yAxisRange: [GRAPH_HEIGHT, MARGIN_TOP], // Range for Y-axis with margin at the top for the graph
-    xAxisRange: [MARGIN_LEFT, GRAPH_WIDTH], // Range for X-axis with margin on the left for the labels
+    yAxisRange: [GRAPH_HEIGHT, MARGIN_TOP], // Range for Y-axis with top margin
+    xAxisRange: [MARGIN_LEFT, GRAPH_WIDTH], // Range for X-axis with left margin for labels
   });
 
   return (
@@ -43,7 +43,7 @@ export default function SpeedGraph() {
         height={SVG_HEIGHT}
         style={{ alignItems: "center" }}
       >
-        {/* Vertical grid lines */}
+        {/* Vertical grid lines for X-axis */}
         {graph.xAxisLabels.map((label, index) => (
           <Line
             key={`vertival-grid-${index}`}
@@ -56,7 +56,7 @@ export default function SpeedGraph() {
           />
         ))}
 
-        {/* Horizontal grid lines */}
+        {/* Horizontal grid lines for Y-axis */}
         {graph.yAxisLabels.map((label, index) => (
           <Line
             key={`horizontal-grid-${index}`}

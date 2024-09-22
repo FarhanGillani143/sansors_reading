@@ -50,7 +50,6 @@ const styles = StyleSheet.create({
   container: {
     gap: 10,
     width: "100%",
-    paddingVertical: 10,
     alignItems: "center",
   },
   graphTitle: {

@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Text, View, Button, StyleSheet } from "react-native";
 
 import LocationTracking from "./Location/LocationTracking";
@@ -17,6 +17,8 @@ export default function Home() {
     noSensorAvailable,
     sensorsController,
   } = useContext<SensorContextType>(SensorsContext);
+
+  const [showGraph, setShowGraph] = useState(false);
 
   /**
    * Checks whether the "View All Readings" button should be displayed.
@@ -38,13 +40,23 @@ export default function Home() {
 
   const buttonTitle = `View This Session's Readings (${sensorsData.length})`;
 
+  useEffect(() => {
+    // console.log("In use effect");
+    if (!showGraph && sensorsData.length > 0) setShowGraph(true);
+  }, [sensorsData]);
+
   return (
     <View style={styles.container}>
       <SensorTimeInterval />
-      <View style={[styles.container, { gap: 10, flex: 2 }]}>
-        <AccelerometerSensor />
-        <LocationTracking />
-      </View>
+      <AccelerometerSensor />
+      {startSensors && (
+        <NavigationButton
+          navigateTo="/graphs"
+          title="View Real-time Graph"
+          style={{ paddingVertical: 10 }}
+        />
+      )}
+      <LocationTracking />
 
       <View style={{ gap: 10, paddingVertical: 10 }}>
         {sessionStartTime && (
@@ -82,10 +94,8 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     alignItems: "center",
-    justifyContent: "center",
   },
   buttons: {
-    flex: 1,
     gap: 10,
     alignItems: "center",
   },

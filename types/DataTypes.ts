@@ -1,3 +1,4 @@
+import { ScaleLinear, ScaleTime } from "d3";
 import * as Location from "expo-location";
 import { AccelerometerMeasurement } from "expo-sensors";
 
@@ -16,4 +17,15 @@ export type SensorDataType = {
   timestamp: string; // Manually added timestamp in string format
   accelerationData: AccelerometerDataType | undefined; // Accelerometer data without timestamp
   locationData: Location.LocationObjectCoords | undefined; // Location data if available
+};
+
+export type AccelerationGraphType = {
+  xAxisScale: ScaleTime<number, number, never>;
+  yAxisScale: ScaleLinear<number, number, never>;
+  xAxisLabels: Date[]; // Labels for the x-axis ticks
+  yAxisLabels: string[]; // Labels for the y-axis ticks
+  accelerationCurves: {
+    curve: string | null;
+    color: string;
+  }[];
 };

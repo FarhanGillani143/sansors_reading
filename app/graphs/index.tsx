@@ -1,19 +1,49 @@
-import React, { useContext } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import React, { useContext, useEffect, useState } from "react";
+import { Button, StyleSheet, Text, View } from "react-native";
 
 import SpeedGraph from "./Speed/Graph";
-import AccelerationGraph from "./Acceleration/Graph";
+import AccelerationGraph from "./Acceleration/Graph"; 
+import { SensorDataType } from "../../types/DataTypes";
+import { getMaxMinValue } from "../../utils/Graphs/MaxMinValue";
 import { SensorContextType, SensorsContext } from "../../context/SensorContext";
 
 export default function index() {
-  const { sensorsData } = useContext<SensorContextType>(SensorsContext);
+  const { sensorsData, noSensorAvailable, startSensors, sensorsController } =
+    useContext<SensorContextType>(SensorsContext);
+
+  const [recentMinuteData, setRecentMinuteData] = useState<SensorDataType[]>(
+    []
+  );
+  const [initialMinValue, setInitialMinValue] = useState<number>(0);
+  const [initialMaxValue, setInitialMaxValue] = useState<number>(0);
+
+  useEffect(() => {
+    const recentMinuteData = sensorsData.slice(0, 299);
+
+    const { maxValue, minValue } = getMaxMinValue(recentMinuteData);
+
+    setRecentMinuteData(recentMinuteData);
+    setInitialMaxValue(maxValue);
+    setInitialMinValue(minValue);
+  }, []);
 
   return (
     <>
-      {sensorsData.length > 0 ? (
+      {recentMinuteData.length > 0 ? (
         <>
-          <AccelerationGraph />
+          <AccelerationGraph
+            recentMinuteData={recentMinuteData}
+            initialMaxValue={initialMaxValue}
+            initialMinValue={initialMinValue}
+          />
           {/* <SpeedGraph /> */}
+          {/* Button to start/stop tracking the sensor */}
+          {!noSensorAvailable && startSensors && (
+            <Button
+              onPress={sensorsController}
+              title={startSensors ? "Stop Tracking" : "Start Tracking"}
+            />
+          )}
         </>
       ) : (
         <View style={styles.container}>

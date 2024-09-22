@@ -22,7 +22,8 @@ type PropsType = {
 };
 
 export default function SensorContextProvider({ children }: PropsType) {
-  const sensorDataRef = useRef<SensorDataType[]>([]); // Ref to store sensor data (accelerometer and location).
+  const [sensorsData, setSensorsData] = useState<SensorDataType[]>([]);
+  // const sensorDataRef = useRef<SensorDataType[]>([]); // Ref to store sensor data (accelerometer and location).
   const [locationPermission, setLocationPermission] = useState<boolean>(false); // State to track location permission status.
   const [sessionEndTime, setSessionEndTime] = useState<Date>(); // State to track the session end time.
   const [sessionStartTime, setSessionStartTime] = useState<Date>(); // State to track the session start time.
@@ -60,14 +61,16 @@ export default function SensorContextProvider({ children }: PropsType) {
       // Store the session's data and update session names if successful.
       const isStored = await storeSessionData({
         sessionName,
-        sensorsData: sensorDataRef.current,
+        sensorsData,
+        // sensorsData: sensorDataRef.current,
       });
 
       if (isStored) {
         await storeSessionNames([sessionName, ...allSessions]);
       }
     } else {
-      sensorDataRef.current = []; // Clear previous session data when starting a new session.
+      setSensorsData([]);
+      // sensorDataRef.current = []; // Clear previous session data when starting a new session.
       setStartSensors(true);
       setSessionStartTime(timeNow);
     }
@@ -107,11 +110,16 @@ export default function SensorContextProvider({ children }: PropsType) {
      * Otherwise, record only accelerometer data.
      */
     const recordDataWithLocation =
-      acceleration && locationPermission && locationData;
-    const recordDataWithoutLocation = acceleration && !locationPermission;
+      !!acceleration && locationPermission && !!locationData;
+    const recordDataWithoutLocation = !!acceleration && locationPermission;
     const recordDataWithoutAcceleration =
-      locationPermission && locationData && !isAccelerometerAvailable;
+      locationPermission && !!locationData && !isAccelerometerAvailable;
 
+    // console.log(
+    //   recordDataWithLocation,
+    //   recordDataWithoutLocation,
+    //   recordDataWithoutAcceleration
+    // );
     /** Doing all these checks because we want to record data of all the sensors in
      * a sync if all the sensors are available
      */
@@ -128,7 +136,9 @@ export default function SensorContextProvider({ children }: PropsType) {
         locationData,
         accelerationData,
       };
-      sensorDataRef.current.unshift(reading); // Add the new reading to the start of the array.
+      // console.log("Updating the data in context");
+      setSensorsData((prevData) => [reading, ...prevData]);
+      // sensorDataRef.current.unshift(reading); // Add the new reading to the start of the array.
     }
   };
 
@@ -216,7 +226,8 @@ export default function SensorContextProvider({ children }: PropsType) {
         sessionStartTime,
         locationPermission,
         isAccelerometerAvailable,
-        sensorsData: sensorDataRef.current,
+        sensorsData,
+        // sensorsData: sensorDataRef.current,
         noSensorAvailable: !locationPermission && !isAccelerometerAvailable,
         sensorsController,
         updateSensorsData,

@@ -1,138 +1,122 @@
-import { useContext } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
-import { Path, Svg, Text, Line, G } from "react-native-svg";
+import { Path, Svg, G } from "react-native-svg";
 
-import GraphDetails from "./GraphDetails";
-import { generateAccelerationCurves } from "../../../utils/AccelerationCurves";
+import DateLabel from "./DateLabel"; // Component to render the date label
+import RenderXAxis from "./RenderXAxis"; // Component to render the x-axis ticks
+import RenderYAxis from "./RenderYAxis"; // Component to render the y-axis ticks
+import GraphDetails from "./GraphDetails"; // Component for additional graph details
+import { SVG_WIDTH, SVG_HEIGHT } from "./Contants"; // Constants for graph dimensions
+import { updateMaxMinValue } from "../../../utils/Graphs/MaxMinValue"; // Utility to update min and max values for the graph
+import AccelerometerSensor from "../../home/Accelerometer/Accelerometer"; // Component for accelerometer sensor
+import { generateAccelerationCurves } from "../../../utils/Graphs/AccelerationCurves"; // Utility to generate graph curves
+import {
+  SensorDataType,
+  AccelerationGraphType,
+} from "../../../types/DataTypes"; // Data types for sensor data
 import {
   SensorsContext,
   SensorContextType,
-} from "../../../context/SensorContext";
-import {
-  SVG_WIDTH,
-  SVG_HEIGHT,
-  MARGIN_TOP,
-  MARGIN_LEFT,
-  GRAPH_WIDTH,
-  GRAPH_HEIGHT,
-  X_AXIS_COLOR,
-  Y_AXIS_COLOR,
-  X_ACCELERATION_COLOR,
-  Y_ACCELERATION_COLOR,
-  Z_ACCELERATION_COLOR,
-} from "./Contants";
+} from "../../../context/SensorContext"; // Context to access sensor data
+
+interface Props {
+  initialMaxValue: number; // Initial maximum value for the graph's y-axis
+  initialMinValue: number; // Initial minimum value for the graph's y-axis
+  recentMinuteData: SensorDataType[]; // Array containing the most recent minute's worth of sensor data
+}
 
 /**
- * Renders a graph displaying acceleration data from sensors.
+ * Component to render a graph that visualizes real-time accelerometer data.
  *
- * @returns {JSX.Element} A view containing an SVG graph with X and Y axes and curves representing acceleration data.
+ * The graph includes X, Y, and Z acceleration curves, along with labels and grid lines.
+ * It dynamically updates based on incoming sensor data, displaying a rolling view of the most recent readings.
+ *
+ * @param {Props} props - Component props.
+ * @param {number} props.initialMaxValue - The initial maximum value for the y-axis scaling.
+ * @param {number} props.initialMinValue - The initial minimum value for the y-axis scaling.
+ * @param {SensorDataType[]} props.recentMinuteData - Array containing recent minute sensor data.
+ *
+ * @returns {JSX.Element} A React component that displays an acceleration graph with data from the device sensors.
  */
-export default function AccelerationGraph() {
-  const { sensorsData } = useContext<SensorContextType>(SensorsContext);
+export default function AccelerationGraph(props: Props) {
+  // Extract sensor-related values from the context
+  const { startSensors, sensorsData } =
+    useContext<SensorContextType>(SensorsContext);
 
-  // Generate graph data for rendering based on sensor data
-  const graph = generateAccelerationCurves({
-    sensorsData: sensorsData,
-    yAxisRange: [GRAPH_HEIGHT, MARGIN_TOP], // Range for Y-axis with margin at the top for the graph
-    xAxisRange: [MARGIN_LEFT, GRAPH_WIDTH], // Range for X-axis with margin on the left for the labels
-  });
+  // Store generated graph data (curves, axis labels, etc.)
+  const [graphData, setGraphData] = useState<AccelerationGraphType>();
+
+  // Track the max and min values for scaling the graph over time
+  const maxValueRef = useRef<number>(props.initialMaxValue); // Ref for tracking the maximum value on the y-axis
+  const minValueRef = useRef<number>(props.initialMinValue); // Ref for tracking the minimum value on the y-axis
+
+  const yAxisData = (label: string, index: number) => {
+    if (!graphData) return null; // Ensure graphData is available before rendering
+    const y = graphData.yAxisScale(Number(label)); // Map label to its y-coordinate
+    return <RenderYAxis key={index} y={y} index={index} label={label} />; // Render y-axis tick & gridlines
+  };
+
+  const xAxisData = (label: Date, index: number) => {
+    if (!graphData) return null; // Ensure graphData is available before rendering
+    const x = graphData.xAxisScale(label); // Map label to its x-coordinate
+    return <RenderXAxis key={index} label={label} index={index} x={x} />; // Render x-axis tick & gridlines
+  };
+
+  /**
+   * useEffect hook to process incoming sensor data and update the graph.
+   * Whenever sensor data changes, this effect recalculates the max/min values and updates the graph.
+   */
+  useEffect(() => {
+    // If the length of recent data is different from the sensor data, update min/max values
+    if (props.recentMinuteData.length !== sensorsData.length) {
+      const { maxValue, minValue } = updateMaxMinValue({
+        prevMin: minValueRef.current,
+        prevMax: maxValueRef.current,
+        sensorData: sensorsData[0], // Process the latest sensor data point
+      });
+
+      maxValueRef.current = maxValue; // Update max value reference
+      minValueRef.current = minValue; // Update min value reference
+    }
+
+    // Take the most recent 299 data points for a 1-minute graph
+    const recentMinuteData = sensorsData.slice(0, 299);
+
+    // Generate the graph data using the updated sensor data and new min/max values
+    const graph = generateAccelerationCurves({
+      minValue: minValueRef.current,
+      maxValue: maxValueRef.current,
+      sensorsData: recentMinuteData, // Pass in recent minute data
+    });
+
+    setGraphData(graph); // Update the graph data state
+  }, [sensorsData, props.recentMinuteData.length]);
 
   return (
     <View style={styles.container}>
-      <GraphDetails />
-      <Svg
-        width={SVG_WIDTH}
-        height={SVG_HEIGHT}
-        style={{ alignItems: "center" }}
-      >
-        {/* Vertical grid lines */}
-        {graph.xAxisLabels.map((label, index) => (
-          <Line
-            key={`vertival-grid-${index}`}
-            x1={graph.xAxisScale(label)}
-            y1={MARGIN_TOP}
-            x2={graph.xAxisScale(label)}
-            y2={GRAPH_HEIGHT}
-            stroke={index == 0 ? Y_AXIS_COLOR : "lightgray"}
-            strokeWidth={2}
-          />
-        ))}
-
-        {/* Horizontal grid lines */}
-        {graph.yAxisLabels.map((label, index) => (
-          <Line
-            key={`horizontal-grid-${index}`}
-            x1={MARGIN_LEFT}
-            y1={graph.yAxisScale(Number(label))}
-            x2={GRAPH_WIDTH}
-            y2={graph.yAxisScale(Number(label))}
-            stroke={index == 0 ? X_AXIS_COLOR : "lightgray"}
-            strokeWidth={2}
-          />
-        ))}
-
-        {/* Acceleration curves */}
-        <G strokeWidth={2} fill={"none"}>
-          {graph.accelerationXCurve && (
-            <Path d={graph.accelerationXCurve} stroke={X_ACCELERATION_COLOR} />
-          )}
-          {graph.accelerationYCurve && (
-            <Path d={graph.accelerationYCurve} stroke={Y_ACCELERATION_COLOR} />
-          )}
-          {graph.accelerationZCurve && (
-            <Path d={graph.accelerationZCurve} stroke={Z_ACCELERATION_COLOR} />
-          )}
-        </G>
-
-        {/* X-Axis labels */}
-        {graph.xAxisLabels.map((label, index) => (
-          <Text
-            key={index}
-            x={graph.xAxisScale(label)}
-            y={GRAPH_HEIGHT + 20}
-            fontSize="12"
-            fill={X_AXIS_COLOR}
-            textAnchor="middle" // Center-align the text
-          >
-            {new Date(label).toLocaleTimeString([], {
-              hour12: false,
-              hour: "2-digit",
-              minute: "2-digit",
-              second: "2-digit",
-            })}
-          </Text>
-        ))}
-
-        {/* Date label under the X-Axis */}
-        {sensorsData.length > 0 && (
-          <Text
-            x={GRAPH_WIDTH / 2} // Center the date label under the graph
-            y={GRAPH_HEIGHT + 40} // Position the date text below the X-axis labels
-            fontSize="14" // Font size of the date label
-            fill={X_AXIS_COLOR} // Color of the date text
-            textAnchor="middle" // Center-align the text
-          >
-            {sensorsData[0].timeDateObject.toLocaleDateString([], {
-              dateStyle: "full", // Full date format
-            })}
-          </Text>
-        )}
-
-        {/* Y-Axis labels */}
-        {graph.yAxisLabels.map((label, index) => (
-          <Text
-            key={index}
-            x={MARGIN_LEFT - 20} // Position label along the Y-axis
-            y={graph.yAxisScale(Number(label))} // Map the value to the Y-axis scale
-            fontSize="12" // Font size of the Y-axis label
-            fill={Y_AXIS_COLOR} // Color of the Y-axis label text
-            textAnchor="middle" // Center-align the text
-            alignmentBaseline="middle" // Vertically align the text
-          >
-            {label}
-          </Text>
-        ))}
-      </Svg>
+      {startSensors && <AccelerometerSensor />}
+      <GraphDetails /> {/* Render additional graph details */}
+      {graphData && (
+        <Svg
+          width={SVG_WIDTH} // Set SVG width for the graph
+          height={SVG_HEIGHT} // Set SVG height for the graph
+          style={{ alignItems: "center" }} // Center align the graph
+        >
+          {graphData.xAxisLabels.map(xAxisData)}{" "}
+          {/* Render x-axis labels & gridlines */}
+          {graphData.yAxisLabels.map(yAxisData)}{" "}
+          {/* Render y-axis labels & gridlines*/}
+          <DateLabel sensorData={sensorsData[0]} />
+          {/* Render the X, Y, Z acceleration curves */}
+          <G strokeWidth={2} fill={"none"}>
+            {graphData.accelerationCurves.length > 0 &&
+              graphData.accelerationCurves.map(
+                ({ curve, color }, index) =>
+                  curve && <Path key={index} d={curve} stroke={color} /> // Render each curve (X, Y, Z axes)
+              )}
+          </G>
+        </Svg>
+      )}
     </View>
   );
 }
@@ -140,6 +124,7 @@ export default function AccelerationGraph() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center", // Center the graph container horizontally
+    gap: 10,
+    alignItems: "center", // Center align the graph container horizontally
   },
 });

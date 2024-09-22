@@ -1,5 +1,5 @@
 import { line, scaleTime, scaleLinear, curveMonotoneX } from "d3";
-import { SensorDataType } from "../types/DataTypes";
+import { SensorDataType } from "../../types/DataTypes";
 
 type GraphLineParameters = {
   sensorsData: SensorDataType[]; // Array of sensor data containing timestamp and speed values.
