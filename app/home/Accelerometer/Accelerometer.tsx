@@ -35,6 +35,7 @@ export default function AccelerometerSensor() {
    * to handle accelerometer data updates.
    */
   const startTracking = () => {
+    Accelerometer.removeAllListeners(); // To prevent duplicate listeners
     Accelerometer.setUpdateInterval(timeInterval);
     Accelerometer.addListener((data) => {
       setCurrentAcceleration(data);

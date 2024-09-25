@@ -1,115 +1,107 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { StyleSheet, View } from "react-native";
-import { Path, Svg, G } from "react-native-svg";
+import { Text } from "react-native";
+import { G, Path, Svg } from "react-native-svg";
 
-import DateLabel from "./DateLabel"; // Component to render the date label
-import RenderXAxis from "./RenderXAxis"; // Component to render the x-axis ticks
-import RenderYAxis from "./RenderYAxis"; // Component to render the y-axis ticks
-import GraphDetails from "./GraphDetails"; // Component for additional graph details
-import { SVG_WIDTH, SVG_HEIGHT } from "./Contants"; // Constants for graph dimensions
-import { updateMaxMinValue } from "../../../utils/Graphs/MaxMinValue"; // Utility to update min and max values for the graph
-import AccelerometerSensor from "../../home/Accelerometer/Accelerometer"; // Component for accelerometer sensor
-import { generateAccelerationCurves } from "../../../utils/Graphs/AccelerationCurves"; // Utility to generate graph curves
-import {
-  SensorDataType,
-  AccelerationGraphType,
-} from "../../../types/DataTypes"; // Data types for sensor data
+import DateLabel from "./DateLabel";
+import RenderYAxis from "./RenderYAxis";
+import RenderXAxis from "./RenderXAxis";
+import { SVG_HEIGHT, SVG_WIDTH } from "./Contants";
+import { AccelerationGraphType } from "../../../types/DataTypes";
+import { generateAccelerationCurves } from "../../../utils/Graphs/AccelerationCurves";
 import {
   SensorsContext,
   SensorContextType,
-} from "../../../context/SensorContext"; // Context to access sensor data
-
-interface Props {
-  initialMaxValue: number; // Initial maximum value for the graph's y-axis
-  initialMinValue: number; // Initial minimum value for the graph's y-axis
-  recentMinuteData: SensorDataType[]; // Array containing the most recent minute's worth of sensor data
-}
+} from "../../../context/SensorContext";
+import {
+  getMaxMinValue,
+  updateMaxMinValue,
+} from "../../../utils/Graphs/MaxMinValue";
 
 /**
- * Component to render a graph that visualizes real-time accelerometer data.
+ * Graph component renders a real-time acceleration graph based on sensor data.
+ * It tracks accelerometer readings over the last minute and adjusts the graph's y-axis scaling
+ * by dynamically updating the min and max values.
  *
- * The graph includes X, Y, and Z acceleration curves, along with labels and grid lines.
- * It dynamically updates based on incoming sensor data, displaying a rolling view of the most recent readings.
- * Component to render a graph that visualizes real-time accelerometer data.
- *
- * The graph includes X, Y, and Z acceleration curves, along with labels and grid lines.
- * It dynamically updates based on incoming sensor data, displaying a rolling view of the most recent readings.
- *
- * @param {Props} props - Component props.
- * @param {number} props.initialMaxValue - The initial maximum value for the y-axis scaling.
- * @param {number} props.initialMinValue - The initial minimum value for the y-axis scaling.
- * @param {SensorDataType[]} props.recentMinuteData - Array containing recent minute sensor data.
- *
- * @returns {JSX.Element} A React component that displays an acceleration graph with data from the device sensors.
+ * @returns {React.ReactElement} The real-time acceleration graph or a fallback text message.
  */
-export default function AccelerationGraph(props: Props) {
+export default function Graph() {
   // Extract sensor-related values from the context
-  const { startSensors, sensorsData } =
+  const { sensorsData, timeInterval } =
     useContext<SensorContextType>(SensorsContext);
 
   // Store generated graph data (curves, axis labels, etc.)
   const [graphData, setGraphData] = useState<AccelerationGraphType>();
 
   // Track the max and min values for scaling the graph over time
-  const maxValueRef = useRef<number>(props.initialMaxValue); // Ref for tracking the maximum value on the y-axis
-  const minValueRef = useRef<number>(props.initialMinValue); // Ref for tracking the minimum value on the y-axis
+  const maxValueRef = useRef<number>(); // Ref for tracking the maximum value on the y-axis
+  const minValueRef = useRef<number>(); // Ref for tracking the minimum value on the y-axis
 
-  const yAxisData = (label: string, index: number) => {
-    if (!graphData) return null; // Ensure graphData is available before rendering
-    const y = graphData.yAxisScale(Number(label)); // Map label to its y-coordinate
-    return <RenderYAxis key={index} y={y} index={index} label={label} />; // Render y-axis tick & gridlines
-  };
-
-  const xAxisData = (label: Date, index: number) => {
-    if (!graphData) return null; // Ensure graphData is available before rendering
-    const x = graphData.xAxisScale(label); // Map label to its x-coordinate
-    return <RenderXAxis key={index} label={label} index={index} x={x} />; // Render x-axis tick & gridlines
-  };
-
+  const recordsPerMinute = () => 60000 / timeInterval;
   /**
-   * useEffect hook to process incoming sensor data and update the graph.
-   * Whenever sensor data changes, this effect recalculates the max/min values and updates the graph.
+   * Generates the acceleration graph by processing the most recent sensor data,
+   * updating the min and max values, and calculating the graph's curves and axes.
    */
-  useEffect(() => {
-    // If the length of recent data is different from the sensor data, update min/max values
-    if (props.recentMinuteData.length !== sensorsData.length) {
-      const { maxValue, minValue } = updateMaxMinValue({
-        prevMin: minValueRef.current,
-        prevMax: maxValueRef.current,
-        sensorData: sensorsData[0], // Process the latest sensor data point
-      });
+  const generateAccelerationGraph = () => {
+    const lastMinuteData = sensorsData.slice(0, recordsPerMinute()); // Take the most recent 299 data points for a 1-minute graph
+    const latestReading = lastMinuteData[0];
 
-      maxValueRef.current = maxValue; // Update max value reference
-      minValueRef.current = minValue; // Update min value reference
-    }
+    // Update max and min values based on the latest reading
+    const { newMaxValue, newMinValue } = updateMaxMinValue({
+      prevMin: minValueRef.current ?? 0,
+      prevMax: maxValueRef.current ?? 0,
+      latestReading: latestReading, // Process the latest sensor data point
+    });
 
-    // Take the most recent 299 data points for a 1-minute graph
-    const recentMinuteData = sensorsData.slice(0, 299);
+    maxValueRef.current = newMaxValue; // Update max value reference
+    minValueRef.current = newMinValue; // Update min value reference
 
     // Generate the graph data using the updated sensor data and new min/max values
     const graph = generateAccelerationCurves({
       minValue: minValueRef.current,
       maxValue: maxValueRef.current,
-      sensorsData: recentMinuteData, // Pass in recent minute data
+      sensorsData: lastMinuteData, // Pass in recent minute data
     });
 
-    setGraphData(graph); // Update the graph data state
-  }, [sensorsData, props.recentMinuteData.length]);
+    setGraphData(graph); // Store the generated graph data
+  };
+
+  /**
+   * Initial useEffect hook to calculate the initial max and min values for the graph
+   * based on the most recent minute of sensor data.
+   */
+  useEffect(() => {
+    const recentMinuteData = sensorsData.slice(0, recordsPerMinute()); // Get the most recent data points
+    const { maxValue, minValue } = getMaxMinValue(recentMinuteData); // Calculate max and min values
+    maxValueRef.current = maxValue; // Set max value ref
+    minValueRef.current = minValue; // Set min value ref
+  }, []);
+
+  /**
+   * useEffect hook to update the graph whenever the sensor data changes.
+   * Only generate the graph if both max and min values are defined.
+   */
+  useEffect(() => {
+    if (maxValueRef.current != undefined && minValueRef.current != undefined) {
+      generateAccelerationGraph(); // Generate the graph when the sensor data changes
+    }
+  }, [sensorsData]);
 
   return (
-    <View style={styles.container}>
-      {startSensors && <AccelerometerSensor />}
-      <GraphDetails />
-      {graphData && (
+    <React.Fragment>
+      {graphData ? (
         <Svg
           width={SVG_WIDTH}
           height={SVG_HEIGHT}
           style={{ alignItems: "center" }}
         >
-          {graphData.xAxisLabels.map(xAxisData)}
-          {graphData.yAxisLabels.map(yAxisData)}
+          {/* Render the X and Y axis */}
+          {graphData.xAxisData.map(RenderXAxis)}
+          {graphData.yAxisData.map(RenderYAxis)}
+
+          {/* Render the date label */}
           <DateLabel sensorData={sensorsData[0]} />
 
+          {/* Render the acceleration curves */}
           <G strokeWidth={2} fill={"none"}>
             {graphData.accelerationCurves.length > 0 &&
               graphData.accelerationCurves.map(
@@ -118,15 +110,9 @@ export default function AccelerationGraph(props: Props) {
               )}
           </G>
         </Svg>
+      ) : (
+        <Text>No graph data available at the moment</Text>
       )}
-    </View>
+    </React.Fragment>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    gap: 10,
-    alignItems: "center", // Center align the graph container horizontally
-  },
-});

@@ -13,7 +13,7 @@ const MARGIN_RIGHT = 30;
 const MARGIN_BOTTOM = 50;
 
 // Set SVG height and width based on device screen dimensions
-const SVG_HEIGHT = 350;
+const SVG_HEIGHT = 300;
 const SVG_WIDTH = Dimensions.get("window").width;
 
 // Calculate graph dimensions by subtracting space for labels

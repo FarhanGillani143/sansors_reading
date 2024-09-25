@@ -18,6 +18,7 @@ export default function GraphDetails() {
   return (
     <View style={styles.container}>
       <Text style={styles.graphTitle}>Acceleration Graph</Text>
+      <Text>(Last Minute Data Only)</Text>
       <View>
         <View style={{ flexDirection: "row" }}>
           <Text style={{ fontSize: 16 }}>x-Axis - </Text>

@@ -38,7 +38,7 @@ export type UpdateSensorsData = {
 };
 
 export type UpdateMinMaxType = {
-  prevMin: number;
-  prevMax: number;
-  sensorData: SensorDataType;
+  prevMin: number; // Previous minimum acceleration value from the dataset.
+  prevMax: number; // Previous maximum acceleration value from the dataset.
+  latestReading: SensorDataType; // Latest sensor reading, which contains acceleration data for x, y, and z axes.
 };

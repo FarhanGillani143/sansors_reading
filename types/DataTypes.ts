@@ -1,4 +1,3 @@
-import { ScaleLinear, ScaleTime } from "d3";
 import * as Location from "expo-location";
 import { AccelerometerMeasurement } from "expo-sensors";
 
@@ -13,19 +12,42 @@ export type AccelerometerDataType = Omit<AccelerometerMeasurement, "timestamp">;
  * accelerometer data, and optional location data.
  */
 export type SensorDataType = {
-  timeDateObject: Date; // To access actual date object
-  timestamp: string; // Manually added timestamp in string format
-  accelerationData: AccelerometerDataType | undefined; // Accelerometer data without timestamp
-  locationData: Location.LocationObjectCoords | undefined; // Location data if available
+  timeDateObject: Date; // Date object to capture the actual time the sensor data is recorded
+  timestamp: string; // Manually added timestamp in string format for display or logging
+  accelerationData: AccelerometerDataType | undefined; // Accelerometer data (x, y, z axes) without timestamp
+  locationData: Location.LocationObjectCoords | undefined; // Optional location data if available (latitude, longitude, etc.)
 };
 
+/**
+ * Type for representing an array of acceleration curve data with its associated color.
+ */
+export type CurvesType = {
+  curve: string | null; // SVG path string for drawing the curve (could be null if no curve is available)
+  color: string; // Color used to render the curve on the graph
+}[];
+
+/**
+ * Type representing the x-axis label and its scaled value (mapped to pixels).
+ */
+export type XAxisDataType = {
+  label: Date; // Date label for the x-axis tick
+  scaledLabel: number; // Scaled pixel position for rendering the tick label
+};
+
+/**
+ * Type representing the y-axis label and its scaled value (mapped to pixels).
+ */
+export type YAxisDataType = {
+  label: string; // String label for the y-axis tick (e.g., acceleration value)
+  scaledLabel: number; // Scaled pixel position for rendering the tick label
+};
+
+/**
+ * Type representing the complete acceleration graph, which includes the
+ * x and y axis data (for ticks) and the acceleration curves for X, Y, and Z axes.
+ */
 export type AccelerationGraphType = {
-  xAxisScale: ScaleTime<number, number, never>;
-  yAxisScale: ScaleLinear<number, number, never>;
-  xAxisLabels: Date[]; // Labels for the x-axis ticks
-  yAxisLabels: string[]; // Labels for the y-axis ticks
-  accelerationCurves: {
-    curve: string | null;
-    color: string;
-  }[];
+  xAxisData: XAxisDataType[]; // Array of labels and their positions for the x-axis ticks
+  yAxisData: YAxisDataType[]; // Array of labels and their positions for the y-axis ticks
+  accelerationCurves: CurvesType; // Array of SVG path strings and their associated colors for the acceleration curves
 };

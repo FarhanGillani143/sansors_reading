@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { Button, StyleSheet, Text, View, Alert } from "react-native";
 import * as Location from "expo-location";
 
@@ -52,14 +52,15 @@ export default function LocationTracking() {
     accuracy: Location.LocationAccuracy.BestForNavigation, // Use the best accuracy available for navigation
   };
 
-  useEffect(() => {
-    let subscription: Location.LocationSubscription | undefined;
+  const subscriptionRef = useRef<Location.LocationSubscription>();
 
+  useEffect(() => {
     (async () => {
       if (locationPermission && startSensors) {
         try {
+          if (subscriptionRef.current) subscriptionRef.current.remove(); // To prevent duplicate subscriptions
           // Start tracking the position if permission is granted and sensors are active
-          subscription = await Location.watchPositionAsync(
+          subscriptionRef.current = await Location.watchPositionAsync(
             watchPositionConfig,
             watchPositionCallback
           );
@@ -68,14 +69,14 @@ export default function LocationTracking() {
         }
       } else {
         // Stop tracking the position and reset the position state if sensors are stopped or permission is denied
-        if (subscription) subscription.remove();
+        if (subscriptionRef.current) subscriptionRef.current.remove();
         setCurrentPosition(emptyPositionObject);
       }
     })();
 
     // Clean up the subscription when the component unmounts or dependencies change
     return () => {
-      if (subscription) subscription.remove();
+      if (subscriptionRef.current) subscriptionRef.current.remove();
     };
   }, [startSensors, locationPermission]);
 
