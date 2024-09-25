@@ -3,7 +3,7 @@ import { Button, StyleSheet, View } from "react-native";
 
 import Graph from "./Graph";
 import GraphDetails from "./GraphDetails"; // Component for additional graph details
-import AccelerometerSensor from "../../home/Accelerometer/Accelerometer"; // Component for accelerometer sensor
+import { ShowAccelerationData } from "../../home/Accelerometer/Accelerometer";
 import {
   SensorsContext,
   SensorContextType,
@@ -17,12 +17,20 @@ import {
  * @returns {React.ReactElement} The acceleration graph UI with the start/stop tracking functionality.
  */
 export default function AccelerationGraph() {
-  const { noSensorAvailable, startSensors, sensorsController } =
+  const { noSensorAvailable, startSensors, sensorsData, sensorsController } =
     useContext<SensorContextType>(SensorsContext);
+
+  const latestReading = sensorsData[0].accelerationData;
 
   return (
     <View style={styles.container}>
-      {startSensors && <AccelerometerSensor />}
+      {startSensors && (
+        <ShowAccelerationData
+          x={latestReading?.x}
+          y={latestReading?.y}
+          z={latestReading?.z}
+        />
+      )}
       <GraphDetails />
       <Graph />
       {!noSensorAvailable && startSensors && (
@@ -39,6 +47,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     gap: 10,
+    width: "100%",
     alignItems: "center", // Center align the graph container horizontally
   },
 });

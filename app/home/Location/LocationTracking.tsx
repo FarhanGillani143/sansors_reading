@@ -58,7 +58,6 @@ export default function LocationTracking() {
     (async () => {
       if (locationPermission && startSensors) {
         try {
-          if (subscriptionRef.current) subscriptionRef.current.remove(); // To prevent duplicate subscriptions
           // Start tracking the position if permission is granted and sensors are active
           subscriptionRef.current = await Location.watchPositionAsync(
             watchPositionConfig,

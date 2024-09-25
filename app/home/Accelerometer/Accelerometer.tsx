@@ -7,6 +7,27 @@ import {
   SensorContextType,
 } from "../../../context/SensorContext";
 
+interface AccelerationDataType {
+  x: number | undefined;
+  y: number | undefined;
+  z: number | undefined;
+}
+
+export const ShowAccelerationData = ({ x, y, z }: AccelerationDataType) => {
+  return (
+    <View style={styles.dataPoints}>
+      <Text style={styles.title}>
+        Acceleration (in gs where 1g = 9.81 m/s^2)
+      </Text>
+      <View style={{ flexDirection: "row", gap: 10 }}>
+        <Text>x: {x?.toFixed(2)} gs</Text>
+        <Text>y: {y?.toFixed(2)} gs</Text>
+        <Text>z: {z?.toFixed(2)} gs</Text>
+      </View>
+    </View>
+  );
+};
+
 export default function AccelerometerSensor() {
   /* State to store the current accelerometer readings */
   const [{ x, y, z }, setCurrentAcceleration] = useState({
@@ -35,7 +56,6 @@ export default function AccelerometerSensor() {
    * to handle accelerometer data updates.
    */
   const startTracking = () => {
-    Accelerometer.removeAllListeners(); // To prevent duplicate listeners
     Accelerometer.setUpdateInterval(timeInterval);
     Accelerometer.addListener((data) => {
       setCurrentAcceleration(data);
@@ -58,16 +78,7 @@ export default function AccelerometerSensor() {
   return (
     <View style={styles.container}>
       {isAccelerometerAvailable ? (
-        <View style={styles.dataPoints}>
-          <Text style={styles.title}>
-            Acceleration (in gs where 1g = 9.81 m/s^2)
-          </Text>
-          <View style={{ flexDirection: "row", gap: 10 }}>
-            <Text>x: {x.toFixed(2)} gs</Text>
-            <Text>y: {y.toFixed(2)} gs</Text>
-            <Text>z: {z.toFixed(2)} gs</Text>
-          </View>
-        </View>
+        <ShowAccelerationData x={x} y={y} z={z} />
       ) : (
         <Text>Accelerometer sensor is not available on this device</Text>
       )}
