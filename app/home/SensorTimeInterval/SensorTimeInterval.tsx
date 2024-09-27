@@ -1,114 +1,82 @@
-import React, { useContext, useState } from "react";
-import {
-  Text,
-  View,
-  Button,
-  Keyboard,
-  TextInput,
-  StyleSheet,
-} from "react-native";
+import React, { useContext } from "react";
+import { Text, View, StyleSheet } from "react-native";
+import { Dropdown } from "react-native-element-dropdown";
 
 import {
   SensorsContext,
   SensorContextType,
 } from "../../../context/SensorContext";
 
+type OptionType = {
+  label: string;
+  value: number;
+};
+
+const timeIntervalOptions: OptionType[] = [
+  { label: "0.2s", value: 200 },
+  { label: "0.4s", value: 400 },
+  { label: "0.6s", value: 600 },
+  { label: "0.8s", value: 800 },
+  { label: "1.0s", value: 1000 },
+  { label: "1.2s", value: 1200 },
+  { label: "1.4s", value: 1400 },
+  { label: "1.6s", value: 1600 },
+  { label: "1.8s", value: 1800 },
+  { label: "2.0s", value: 2000 },
+];
+
 export default function SensorTimeInterval() {
   const { timeInterval, updateTimeIntervalAsync } =
     useContext<SensorContextType>(SensorsContext);
 
-  // State to hold the new time interval entered by the user
-  const [newTimeInterval, setNewTimeInterval] = useState<number | null>();
-
-  // State to track if the text input is focused
-  const [inputFocused, setInputFocused] = useState<boolean>(false);
-
-  // State to track if there's an error due to an invalid time interval
-  const [rangeError, setRangeError] = useState<boolean>(false);
-
   /**
-   * Handles the application of the new sensor time interval.
-   * If the interval is valid (>= 200ms), updates the interval, hides the keyboard,
-   * and resets the input and error states. Otherwise, sets a range error.
+   * Applies a new time interval for sensor data collection.
    */
-  const applyNewInterval = async () => {
-    if (newTimeInterval && newTimeInterval >= 200) {
-      await updateTimeIntervalAsync(newTimeInterval);
-      Keyboard.dismiss();
-      setInputFocused(false);
-      setNewTimeInterval(null);
-      setRangeError(false);
-    } else setRangeError(true);
-  };
-
-  /**
-   * Cancels the new time interval input by resetting the input and error states
-   * and dismissing the keyboard.
-   */
-  const cancelNewInterval = () => {
-    Keyboard.dismiss();
-    setInputFocused(false);
-    setNewTimeInterval(null);
-    setRangeError(false);
+  const applyNewInterval = async ({ label, value }: OptionType) => {
+    // If the new value is different from the current interval, update it
+    if (value !== timeInterval) {
+      await updateTimeIntervalAsync(value);
+    }
   };
 
   return (
     <View style={styles.container}>
-      <View style={styles.changeInterval}>
-        <Text>Sensor Time Interval</Text>
-        <TextInput
-          style={styles.textInput}
-          placeholder={`${timeInterval}ms`} // Placeholder shows the current interval
-          value={newTimeInterval ? `${newTimeInterval}` : ""}
-          keyboardType="number-pad"
-          onFocus={() => setInputFocused(true)}
-          onChange={(value) =>
-            setNewTimeInterval(Number(value.nativeEvent.text))
-          }
-        />
-      </View>
-
-      {/* Conditional rendering based on whether the input is focused */}
-      {inputFocused ? (
-        <View style={{ flexDirection: "row" }}>
-          <Button title="Apply" onPress={applyNewInterval} />
-          <Button title="Cancel" onPress={cancelNewInterval} />
-        </View>
-      ) : (
-        <Text style={{ fontSize: 10, color: "gray" }}>
-          Enter value to change interval
-        </Text>
-      )}
-
-      {/* Display an error message if the entered interval is invalid */}
-      {rangeError && (
-        <Text style={{ color: "red" }}>
-          Sensor Time Interval should not be less than 200
-        </Text>
-      )}
+      <Text style={styles.title}>Sensor Time Interval</Text>
+      <Dropdown
+        style={styles.box}
+        containerStyle={styles.dropdown}
+        labelField="label" // Field name for the displayed label
+        valueField="value" // Field name for the actual value
+        data={timeIntervalOptions} // Available time interval options
+        placeholder={`${timeInterval / 1000}s`} // Show the current interval in seconds
+        onChange={applyNewInterval} // Update the interval when an option is selected
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    gap: 10,
-    padding: 20,
-    width: "100%",
-    alignItems: "center",
-    backgroundColor: "yellow",
+    gap: 10, // Space between elements
+    padding: 20, // Padding around the container
+    width: "100%", // Full width container
+    flexDirection: "row", // Align items in a row
+    alignItems: "center", // Center items vertically
+    justifyContent: "center", // Center items horizontally
+    backgroundColor: "yellow", // Background color of the container
   },
-  changeInterval: {
-    gap: 10,
-    width: "100%",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+  title: {
+    fontSize: 16, // Font size for the title text
   },
-  textInput: {
-    borderWidth: 1,
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderColor: "black",
+  box: {
+    padding: 5, // Padding inside the dropdown box
+    width: "25%", // Width of the dropdown box
+    borderWidth: 1, // Border width for the dropdown box
+    borderColor: "green", // Border color for the dropdown box
+  },
+  dropdown: {
+    height: "40%", // Height of the dropdown box
+    borderWidth: 1, // Border width for the dropdown list
+    borderColor: "green", // Border color for the dropdown list
   },
 });
