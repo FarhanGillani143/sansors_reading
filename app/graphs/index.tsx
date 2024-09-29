@@ -1,6 +1,5 @@
 import { StyleSheet, View } from "react-native";
-
-import AccelerationGraph from "./Acceleration/GraphScreen";
+import AccelerationGraph from "./Acceleration/AcclerationGraph";
 
 export default function index() {
   return (

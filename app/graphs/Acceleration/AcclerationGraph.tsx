@@ -3,6 +3,7 @@ import { Button, StyleSheet, View } from "react-native";
 
 import Graph from "./Graph";
 import GraphDetails from "./GraphDetails"; // Component for additional graph details
+import AccelerationVarianceGraph from "./VarianceGraph";
 import { ShowAccelerationData } from "../../home/Accelerometer/Accelerometer";
 import {
   SensorsContext,
@@ -17,10 +18,16 @@ import {
  * @returns {React.ReactElement} The acceleration graph UI with the start/stop tracking functionality.
  */
 export default function AccelerationGraph() {
-  const { noSensorAvailable, startSensors, sensorsData, sensorsController } =
-    useContext<SensorContextType>(SensorsContext);
+  const {
+    sensorsData,
+    timeInterval,
+    startSensors,
+    noSensorAvailable,
+    sensorsController,
+  } = useContext<SensorContextType>(SensorsContext);
 
   const latestReading = sensorsData[0].accelerationData;
+  const recordsLimit = 60000 / timeInterval;
 
   return (
     <View style={styles.container}>
@@ -31,8 +38,11 @@ export default function AccelerationGraph() {
           z={latestReading?.z}
         />
       )}
-      <GraphDetails />
-      <Graph />
+      {sensorsData.length > recordsLimit && (
+        <GraphDetails graphType="variance" />
+      )}
+      {/* <Graph /> */}
+      <AccelerationVarianceGraph />
       {!noSensorAvailable && startSensors && (
         <Button
           onPress={sensorsController}

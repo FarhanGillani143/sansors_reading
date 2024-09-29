@@ -37,7 +37,7 @@ export default function RenderYAxis(
       {/* Labels */}
       <SVGText
         y={scaledLabel} // Position the text on the Y-axis
-        x={MARGIN_LEFT - 20} // Offset the label to the left of the graph
+        x={MARGIN_LEFT - 25} // Offset the label to the left of the graph
         fontSize="12" // Font size for the label
         fill={Y_AXIS_COLOR} // Text color
         textAnchor="middle" // Horizontally centers the text

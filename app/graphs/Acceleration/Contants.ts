@@ -8,7 +8,7 @@ const Y_ACCELERATION_COLOR = "green";
 const Z_ACCELERATION_COLOR = "red";
 
 const MARGIN_TOP = 10;
-const MARGIN_LEFT = 40;
+const MARGIN_LEFT = 50;
 const MARGIN_RIGHT = 30;
 const MARGIN_BOTTOM = 50;
 

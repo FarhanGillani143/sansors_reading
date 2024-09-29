@@ -103,8 +103,14 @@ export function generateAccelerationCurves({
   // Get the x-axis scale and labels based on the time range
   const { xAxisScale, xAxisData } = getXAxisData(startTime, endTime);
 
+  const numOfTicks = 6;
+
   // Get the y-axis scale and labels based on the acceleration range
-  const { yAxisScale, yAxisData } = getYAxisData(minValue, maxValue);
+  const { yAxisScale, yAxisData } = getYAxisData(
+    minValue,
+    maxValue,
+    numOfTicks
+  );
 
   // Generate the acceleration curves for X, Y, and Z axes
   const accelerationCurves = generateCurves({

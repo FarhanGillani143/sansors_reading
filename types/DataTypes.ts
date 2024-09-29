@@ -51,3 +51,14 @@ export type AccelerationGraphType = {
   yAxisData: YAxisDataType[]; // Array of labels and their positions for the y-axis ticks
   accelerationCurves: CurvesType; // Array of SVG path strings and their associated colors for the acceleration curves
 };
+
+export type VarianceGraphType = {
+  xAxisData: XAxisDataType[]; // Array of labels and their positions for the x-axis ticks
+  yAxisData: YAxisDataType[]; // Array of labels and their positions for the y-axis ticks
+  curve: string | null; // SVG path string for the variance acceleration curves
+};
+
+export type VarianceDataType = {
+  variance: number; // Mean Variance of Acceleration values
+  timestamp: Date;
+};
