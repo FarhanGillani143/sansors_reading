@@ -94,8 +94,8 @@ const styles = StyleSheet.create({
   },
   dataPoints: {
     gap: 5,
-    padding: 10,
     width: "100%",
+    paddingVertical: 20,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#e0f2f1",

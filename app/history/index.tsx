@@ -1,6 +1,7 @@
 import React, { useContext } from "react";
-import { Button, FlatList, StyleSheet, Text, View } from "react-native";
+import { FlatList, StyleSheet, Text, View } from "react-native";
 
+import TextButton from "../../components/TextButton";
 import { retrieveSessionData } from "../../utils/ManageStorage";
 import { SensorContextType, SensorsContext } from "../../context/SensorContext";
 
@@ -14,7 +15,7 @@ export default function SessionHistory() {
   );
 
   const renderItem = ({ item }: { item: string }) => (
-    <Button
+    <TextButton
       title={item}
       onPress={async () => await retrieveSessionData(item)}
     />

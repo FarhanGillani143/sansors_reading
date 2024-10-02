@@ -1,10 +1,10 @@
 import React, { useCallback, useContext } from "react";
-import { Text, View, Button, StyleSheet } from "react-native";
+import { Text, View, StyleSheet } from "react-native";
 
+import TextButton from "../../components/TextButton";
 import LocationTracking from "./Location/LocationTracking";
 import NavigationLink from "../../components/NavigationButton";
 import AccelerometerSensor from "./Accelerometer/Accelerometer";
-import SensorTimeInterval from "./SensorTimeInterval/SensorTimeInterval";
 import { SensorContextType, SensorsContext } from "../../context/SensorContext";
 
 /**
@@ -44,9 +44,6 @@ export default function Home() {
 
   return (
     <View style={styles.container}>
-      {/* Interval settings for sensor tracking */}
-      <SensorTimeInterval />
-
       {/* Component handling accelerometer sensor */}
       <AccelerometerSensor />
 
@@ -64,12 +61,17 @@ export default function Home() {
       <LocationTracking />
 
       {/* Display start and end times of the current session */}
-      <View style={{ gap: 10, paddingVertical: 10 }}>
+      <View
+        style={[styles.sessionInfo, { borderWidth: sessionStartTime ? 1 : 0 }]}
+      >
         {sessionStartTime && (
-          <Text>Session Started at: {sessionStartTime.toLocaleString()}</Text>
+          <Text>{startSensors ? "Current Session" : "Last Session"}</Text>
+        )}
+        {sessionStartTime && (
+          <Text>Started at: {sessionStartTime.toLocaleString()}</Text>
         )}
         {sessionEndTime && !startSensors && (
-          <Text>Session Ended at: {sessionEndTime.toLocaleString()}</Text>
+          <Text>Ended at: {sessionEndTime.toLocaleString()}</Text>
         )}
       </View>
 
@@ -77,7 +79,7 @@ export default function Home() {
       <View style={styles.buttons}>
         {/* Show a button to start/stop tracking if sensors are available */}
         {!noSensorAvailable && (
-          <Button
+          <TextButton
             onPress={sensorsController}
             title={startSensors ? "Stop Tracking" : "Start Tracking"}
           />
@@ -107,9 +109,17 @@ export default function Home() {
 
 const styles = StyleSheet.create({
   container: {
+    gap: 10,
     flex: 1,
     width: "100%",
     alignItems: "center",
+  },
+  sessionInfo: {
+    gap: 10,
+    paddingVertical: 10,
+    alignItems: "center",
+    borderColor: "black",
+    paddingHorizontal: 20,
   },
   buttons: {
     gap: 10,

@@ -1,16 +1,14 @@
 import React, { useContext, useRef } from "react";
-import { Button, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 
 import GraphDetails from "./Shared/GraphDetails";
+import TextButton from "../../components/TextButton";
+import { AccelerationParams } from "../../routes/Params";
 import ProgressIndicator from "./Shared/ProgressIndicator";
 import AccelerationVarianceGraph from "./VarianceGraph/VarianceGraph";
 import { ShowAccelerationData } from "../home/Accelerometer/Accelerometer";
 import { SensorContextType, SensorsContext } from "../../context/SensorContext";
-
-type Params = {
-  graphType: "real-time" | "general";
-};
 
 /**
  * AccelerationGraph component renders the acceleration graph and provides controls to
@@ -23,7 +21,7 @@ export default function AccelerationGraph() {
   const { sensorsData, timeInterval, startSensors, sensorsController } =
     useContext<SensorContextType>(SensorsContext);
 
-  const { graphType } = useLocalSearchParams<Params>();
+  const { graphType } = useLocalSearchParams<AccelerationParams>();
 
   const latestReading = sensorsData[0].accelerationData;
   const recordsLimit = useRef<number>(60000 / timeInterval).current;
@@ -33,35 +31,38 @@ export default function AccelerationGraph() {
   );
 
   return (
-    <View style={styles.container}>
-      {startSensors && (
-        <ShowAccelerationData
-          x={latestReading?.x}
-          y={latestReading?.y}
-          z={latestReading?.z}
-        />
-      )}
-      {sensorsData.length > recordsLimit ? (
-        <>
-          <GraphDetails graphType="variance" />
-          <AccelerationVarianceGraph
-            graphType={graphType}
-            recordsLimit={recordsLimit}
+    <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+      <View style={styles.container}>
+        {startSensors && (
+          <ShowAccelerationData
+            x={latestReading?.x}
+            y={latestReading?.y}
+            z={latestReading?.z}
           />
-        </>
-      ) : (
-        <ProgressIndicator remainingTime={remainingTimeToGenerateRef.current} />
-      )}
-      {startSensors && sensorsData.length > recordsLimit && (
-        <Button title={"Stop Tracking"} onPress={sensorsController} />
-      )}
-    </View>
+        )}
+        {sensorsData.length > recordsLimit ? (
+          <>
+            <GraphDetails graphType="variance" />
+            <AccelerationVarianceGraph
+              graphType={graphType}
+              recordsLimit={recordsLimit}
+            />
+          </>
+        ) : (
+          <ProgressIndicator
+            remainingTime={remainingTimeToGenerateRef.current}
+          />
+        )}
+        {startSensors && sensorsData.length > recordsLimit && (
+          <TextButton title={"Stop Tracking"} onPress={sensorsController} />
+        )}
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     gap: 10,
     width: "100%",
     alignItems: "center", // Center align the graph container horizontally

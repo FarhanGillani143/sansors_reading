@@ -1,7 +1,8 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import { Button, StyleSheet, Text, View, Alert } from "react-native";
+import { StyleSheet, Text, View, Alert } from "react-native";
 import * as Location from "expo-location";
 
+import TextButton from "../../../components/TextButton";
 import {
   SensorsContext,
   SensorContextType,
@@ -96,7 +97,7 @@ export default function LocationTracking() {
         <View style={styles.container}>
           <Text style={styles.title}>Location Tracking</Text>
           <Text style={{ fontSize: 16 }}>Location permission not granted</Text>
-          <Button
+          <TextButton
             title="Request Permission"
             onPress={requestLocationPermission}
           />

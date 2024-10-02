@@ -31,7 +31,7 @@ export default function AccelerationVarianceGraph({
   recordsLimit,
 }: Props) {
   // Extract sensor data and time interval from the global context
-  const { sensorsData, varianceData, updateVarianceData } =
+  const { startSensors, sensorsData, varianceData, updateVarianceData } =
     useContext<SensorContextType>(SensorsContext);
 
   // Store the generated graph data (such as curves and axis labels)
@@ -98,14 +98,17 @@ export default function AccelerationVarianceGraph({
     generateGraphData();
   }, [sensorsData]);
 
-  const latestValue =
+  const currentValue =
     varianceDataRef?.current[varianceDataRef.current.length - 1]?.variance;
+
+  const showCurrentValue =
+    startSensors && graphType === "real-time" && !!currentValue;
 
   return (
     <React.Fragment>
-      {graphType === "real-time" && latestValue && (
+      {showCurrentValue && (
         <Text style={styles.value}>
-          Current Value: {latestValue.toFixed(3)}
+          Current Value: {currentValue.toFixed(3)}
         </Text>
       )}
       {graphData && (

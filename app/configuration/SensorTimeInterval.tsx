@@ -2,10 +2,7 @@ import React, { useContext } from "react";
 import { Text, View, StyleSheet } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 
-import {
-  SensorsContext,
-  SensorContextType,
-} from "../../../context/SensorContext";
+import { SensorsContext, SensorContextType } from "../../context/SensorContext";
 
 type OptionType = {
   label: string;
@@ -62,8 +59,7 @@ const styles = StyleSheet.create({
     width: "100%", // Full width container
     flexDirection: "row", // Align items in a row
     alignItems: "center", // Center items vertically
-    justifyContent: "center", // Center items horizontally
-    backgroundColor: "yellow", // Background color of the container
+    backgroundColor: "#FFF", // Background color of the container
   },
   title: {
     fontSize: 16, // Font size for the title text
@@ -72,11 +68,11 @@ const styles = StyleSheet.create({
     padding: 5, // Padding inside the dropdown box
     width: "25%", // Width of the dropdown box
     borderWidth: 1, // Border width for the dropdown box
-    borderColor: "green", // Border color for the dropdown box
+    borderColor: "black", // Border color for the dropdown box
   },
   dropdown: {
     height: "40%", // Height of the dropdown box
     borderWidth: 1, // Border width for the dropdown list
-    borderColor: "green", // Border color for the dropdown list
+    borderColor: "black", // Border color for the dropdown list
   },
 });
