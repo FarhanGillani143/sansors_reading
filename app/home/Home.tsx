@@ -2,8 +2,8 @@ import React, { useCallback, useContext } from "react";
 import { Text, View, Button, StyleSheet } from "react-native";
 
 import LocationTracking from "./Location/LocationTracking";
+import NavigationLink from "../../components/NavigationButton";
 import AccelerometerSensor from "./Accelerometer/Accelerometer";
-import NavigationButton from "../../components/NavigationButton";
 import SensorTimeInterval from "./SensorTimeInterval/SensorTimeInterval";
 import { SensorContextType, SensorsContext } from "../../context/SensorContext";
 
@@ -52,9 +52,10 @@ export default function Home() {
 
       {/* If sensors are active, show a button to view the real-time graph */}
       {startSensors && (
-        <NavigationButton
-          navigateTo="/acceleration?graphType=real-time"
-          title="View Real-time Graph"
+        <NavigationLink
+          navigateTo="/acceleration"
+          params={{ graphType: "real-time" }}
+          title="View Real-time Variance Graph"
           style={{ paddingVertical: 10 }}
         />
       )}
@@ -85,10 +86,11 @@ export default function Home() {
         {/* Show buttons for session data and graph if tracking has stopped */}
         {dataButtonCheck() && (
           <>
-            <NavigationButton title={buttonTitle} navigateTo="/data" />
-            <NavigationButton
-              navigateTo="/acceleration?graphType=general"
-              title="View Acceleration Variance Graph"
+            <NavigationLink navigateTo="/data" title={buttonTitle} />
+            <NavigationLink
+              navigateTo="/acceleration"
+              params={{ graphType: "general" }}
+              title="View Real-time Variance Graph"
               style={{ paddingVertical: 10 }}
             />
           </>
@@ -96,7 +98,7 @@ export default function Home() {
 
         {/* Show a button to view session history if available */}
         {historyButtonCheck() && (
-          <NavigationButton title="View All Sessions" navigateTo="/history" />
+          <NavigationLink title="View All Sessions" navigateTo="/history" />
         )}
       </View>
     </View>
