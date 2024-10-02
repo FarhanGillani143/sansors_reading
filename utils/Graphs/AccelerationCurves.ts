@@ -6,7 +6,7 @@ import {
   X_ACCELERATION_COLOR,
   Y_ACCELERATION_COLOR,
   Z_ACCELERATION_COLOR,
-} from "../../app/graphs/Acceleration/Contants";
+} from "../../app/acceleration/Shared/Contants";
 
 type GraphLineParameters = {
   minValue: number;

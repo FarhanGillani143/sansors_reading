@@ -1,6 +1,6 @@
 import { createContext } from "react";
-import { SensorDataType } from "../types/DataTypes";
 import { UpdateSensorsData } from "../types/FunctionTypes";
+import { SensorDataType, VarianceDataType } from "../types/DataTypes";
 
 /**
  * Context to manage and provide sensor-related state, including accelerometer and location data.
@@ -8,6 +8,7 @@ import { UpdateSensorsData } from "../types/FunctionTypes";
  */
 export const SensorsContext = createContext<SensorContextType>({
   sensorsData: [],
+  varianceData: [],
   startSensors: false,
   timeInterval: 200,
   locationPermission: false,
@@ -17,6 +18,7 @@ export const SensorsContext = createContext<SensorContextType>({
   noSensorAvailable: false,
   isAccelerometerAvailable: false,
   sensorsController() {},
+  updateVarianceData(data) {},
   updateSensorsData() {},
   requestLocationPermission() {},
   async updateTimeIntervalAsync(interval) {},
@@ -26,8 +28,21 @@ export const SensorsContext = createContext<SensorContextType>({
  * Interface representing the structure of the context used for managing sensor data and state.
  */
 export interface SensorContextType {
+  /**
+   * Array of variance data related to accelerometer readings.
+   */
+  varianceData: VarianceDataType[];
+
+  /**
+   * Flag to indicate if no sensor is available.
+   */
   noSensorAvailable: boolean;
+
+  /**
+   * Flag indicating if the accelerometer sensor is available.
+   */
   isAccelerometerAvailable: boolean;
+
   /**
    * Array of sensor data records (accelerometer and location).
    */
@@ -67,6 +82,13 @@ export interface SensorContextType {
    * Function to toggle the sensor's active state.
    */
   sensorsController: VoidFunction;
+
+  /**
+   * Function to update variance data in the context.
+   *
+   * @param {VarianceDataType} data - Object containing the variance data to update.
+   */
+  updateVarianceData: (data: VarianceDataType) => void;
 
   /**
    * Function to update the sensor data in the context.

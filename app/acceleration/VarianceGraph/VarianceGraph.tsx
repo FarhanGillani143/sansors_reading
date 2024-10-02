@@ -1,11 +1,11 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
+import { StyleSheet, Text } from "react-native";
 import { Path, Svg } from "react-native-svg";
 
-import DateLabel from "./DateLabel";
-import RenderYAxis from "./RenderYAxis";
-import RenderXAxis from "./RenderXAxis";
-import { SVG_HEIGHT, SVG_WIDTH } from "./Contants";
-import ProgressIndicator from "./ProgressIndicator";
+import DateLabel from "../Shared/DateLabel";
+import RenderXAxis from "../Shared/RenderXAxis";
+import RenderYAxis from "../Shared/RenderYAxis";
+import { SVG_HEIGHT, SVG_WIDTH } from "../Shared/Contants";
 import { generateVarianceCurve } from "../../../utils/Graphs/VarianceCurve";
 import { VarianceDataType, VarianceGraphType } from "../../../types/DataTypes";
 import { calculateMeanVariance } from "../../../utils/Graphs/CalculateVariance";
@@ -13,7 +13,11 @@ import {
   SensorsContext,
   SensorContextType,
 } from "../../../context/SensorContext";
-import { StyleSheet, Text } from "react-native";
+
+interface Props {
+  recordsLimit: number;
+  graphType: "real-time" | "general";
+}
 
 /**
  * AccelerationVarianceGraph is a real-time graph component that renders the variance of acceleration
@@ -22,9 +26,12 @@ import { StyleSheet, Text } from "react-native";
  *
  * @returns {React.ReactElement} A rendered SVG graph of the variance data or a loading indicator.
  */
-export default function AccelerationVarianceGraph() {
+export default function AccelerationVarianceGraph({
+  graphType,
+  recordsLimit,
+}: Props) {
   // Extract sensor data and time interval from the global context
-  const { sensorsData, timeInterval } =
+  const { sensorsData, varianceData, updateVarianceData } =
     useContext<SensorContextType>(SensorsContext);
 
   // Store the generated graph data (such as curves and axis labels)
@@ -40,72 +47,68 @@ export default function AccelerationVarianceGraph() {
   const maxValueRef = useRef<number>(standardMax); // Initialize max value for y-axis
   const minValueRef = useRef<number>(standardMin); // Initialize min value for y-axis
 
-  // Track remaining time for generating the graph
-  const remainingTimeToGenerateRef = useRef<number>(
-    timeInterval * sensorsData.length
-  );
-
-  // Limit the records to display only the most recent 1-minute worth of data
-  const recordsLimit = 60000 / timeInterval; // Display 60 seconds of records based on the time interval
-
   /**
    * Generates the variance graph using the most recent sensor data points.
    * It calculates the variance, updates the min/max values, and generates SVG path data.
    */
-  const generateVarianceGraph = () => {
-    // Get the most recent data points for the last minute
-    const lastMinuteData = sensorsData.slice(0, recordsLimit);
+  const generateGraphData = () => {
+    if (graphType === "general") {
+      const lastMinuteVarianceData = varianceData.slice(-recordsLimit);
+      // Generate the graph using the variance data
+      const graph = generateVarianceCurve({
+        minValue: minValueRef.current,
+        maxValue: maxValueRef.current,
+        varianceData: lastMinuteVarianceData,
+      });
 
-    // Calculate the variance for the selected data points
-    const variance = calculateMeanVariance(lastMinuteData);
+      setGraphData(graph);
+    } else {
+      // Get the most recent data points for the last minute
+      const lastMinuteData = sensorsData.slice(0, recordsLimit);
 
-    // Dynamically adjust min and max values based on the calculated variance
-    minValueRef.current = Math.min(minValueRef.current, variance, standardMin);
-    maxValueRef.current = Math.max(maxValueRef.current, variance, standardMax);
+      // Calculate the variance for the selected data points
+      const variance = calculateMeanVariance(lastMinuteData);
+      const timestamp = new Date();
 
-    // Append the new variance data point with a timestamp
-    varianceDataRef.current.push({ variance, timestamp: new Date() });
+      // Append the new variance data point with a timestamp
+      varianceDataRef.current.push({ variance, timestamp });
+      // Update the value in context provider
+      updateVarianceData({ variance, timestamp });
 
-    // Slice the data to retain only the most recent points for a 1-minute graph
-    const recentVarianceData = varianceDataRef.current.slice(-recordsLimit);
+      // Dynamically adjust min and max values based on the calculated variance
+      minValueRef.current = Math.min(minValueRef.current, variance);
+      maxValueRef.current = Math.max(maxValueRef.current, variance);
 
-    // Generate the graph using the variance data
-    const graph = generateVarianceCurve({
-      minValue: minValueRef.current,
-      maxValue: maxValueRef.current,
-      varianceData: recentVarianceData,
-    });
+      const lastMinuteVariance = varianceDataRef.current.slice(-recordsLimit);
 
-    // Update the state with the generated graph data
-    setGraphData(graph);
+      // Generate the graph using the variance data
+      const graph = generateVarianceCurve({
+        minValue: minValueRef.current,
+        maxValue: maxValueRef.current,
+        varianceData: lastMinuteVariance,
+      });
+
+      // Update the state with the generated graph data
+      setGraphData(graph);
+    }
   };
 
   // Generate the variance graph when the sensor data exceeds the limit
   useEffect(() => {
-    if (sensorsData.length > recordsLimit) generateVarianceGraph();
+    generateGraphData();
   }, [sensorsData]);
-
-  // Update the remaining time for generating the graph when the component is mounted
-  useEffect(() => {
-    remainingTimeToGenerateRef.current = timeInterval * sensorsData.length;
-  }, []);
 
   const latestValue =
     varianceDataRef?.current[varianceDataRef.current.length - 1]?.variance;
 
   return (
     <React.Fragment>
-      {latestValue && (
-        <>
-          <Text style={styles.info}>
-            0.000 indicates no change in device orientation in last 1 min
-          </Text>
-          <Text style={styles.value}>
-            Current Value: {latestValue.toFixed(3)}
-          </Text>
-        </>
+      {graphType === "real-time" && latestValue && (
+        <Text style={styles.value}>
+          Current Value: {latestValue.toFixed(3)}
+        </Text>
       )}
-      {graphData ? (
+      {graphData && (
         <Svg
           width={SVG_WIDTH}
           height={SVG_HEIGHT}
@@ -128,18 +131,12 @@ export default function AccelerationVarianceGraph() {
             />
           )}
         </Svg>
-      ) : (
-        <ProgressIndicator remainingTime={remainingTimeToGenerateRef.current} />
       )}
     </React.Fragment>
   );
 }
 
 const styles = StyleSheet.create({
-  info: {
-    textAlign: "center",
-    paddingHorizontal: "5%",
-  },
   value: {
     color: "green",
     fontWeight: "600",

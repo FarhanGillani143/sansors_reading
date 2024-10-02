@@ -1,5 +1,5 @@
 import { scaleLinear } from "d3";
-import { Y_AXIS_RANGE } from "../../app/graphs/Acceleration/Contants";
+import { Y_AXIS_RANGE } from "../../app/acceleration/Shared/Contants";
 
 /**
  * Generates y-axis scaling and tick data for a graph, based on acceleration values.

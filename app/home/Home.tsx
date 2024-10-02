@@ -53,7 +53,7 @@ export default function Home() {
       {/* If sensors are active, show a button to view the real-time graph */}
       {startSensors && (
         <NavigationButton
-          navigateTo="/graphs"
+          navigateTo="/acceleration?graphType=real-time"
           title="View Real-time Graph"
           style={{ paddingVertical: 10 }}
         />
@@ -86,7 +86,11 @@ export default function Home() {
         {dataButtonCheck() && (
           <>
             <NavigationButton title={buttonTitle} navigateTo="/data" />
-            <NavigationButton title="View Graph" navigateTo="/graphs" />
+            <NavigationButton
+              navigateTo="/acceleration?graphType=general"
+              title="View Acceleration Variance Graph"
+              style={{ paddingVertical: 10 }}
+            />
           </>
         )}
 

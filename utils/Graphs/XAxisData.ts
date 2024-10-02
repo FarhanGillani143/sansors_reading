@@ -1,5 +1,5 @@
 import { scaleTime } from "d3";
-import { X_AXIS_RANGE } from "../../app/graphs/Acceleration/Contants";
+import { X_AXIS_RANGE } from "../../app/acceleration/Shared/Contants";
 
 /**
  * Generates x-axis scale and tick data for a graph based on time values.

@@ -8,7 +8,11 @@ import { SensorsContext } from "./SensorContext";
 import { UpdateSensorsData } from "../types/FunctionTypes";
 import dateTimeStringWithMilliseconds from "../utils/dateTimeStringwithMs";
 import { requestLocatonPermissionAsync } from "../utils/LocationPermission";
-import { SensorDataType, AccelerometerDataType } from "../types/DataTypes";
+import {
+  SensorDataType,
+  AccelerometerDataType,
+  VarianceDataType,
+} from "../types/DataTypes";
 import {
   storeSessionData,
   storeSessionNames,
@@ -40,6 +44,8 @@ export default function SensorContextProvider({ children }: PropsType) {
 
   /** Contains names of all the sessions recorded so far */
   const [allSessions, setAllSessions] = useState<string[]>([]);
+
+  const varianceDataRef = useRef<VarianceDataType[]>([]);
 
   /**
    * Toggles the state to start or stop the sensors.
@@ -78,6 +84,10 @@ export default function SensorContextProvider({ children }: PropsType) {
   const updateTimeIntervalAsync = async (interval: number) => {
     setTimeInterval(interval);
     await storeTimeIntervalAsync(interval); // Persist the interval setting for future sessions.
+  };
+
+  const updateVarianceData = (data: VarianceDataType) => {
+    varianceDataRef.current.push(data);
   };
 
   let locationData: Location.LocationObjectCoords | undefined;
@@ -214,9 +224,11 @@ export default function SensorContextProvider({ children }: PropsType) {
         sessionStartTime,
         locationPermission,
         isAccelerometerAvailable,
+        varianceData: varianceDataRef.current,
         noSensorAvailable: !locationPermission && !isAccelerometerAvailable,
         sensorsController,
         updateSensorsData,
+        updateVarianceData,
         updateTimeIntervalAsync,
         requestLocationPermission,
       }}

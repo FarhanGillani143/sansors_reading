@@ -2,10 +2,10 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { Text } from "react-native";
 import { G, Path, Svg } from "react-native-svg";
 
-import DateLabel from "./DateLabel";
-import RenderYAxis from "./RenderYAxis";
-import RenderXAxis from "./RenderXAxis";
-import { SVG_HEIGHT, SVG_WIDTH } from "./Contants";
+import DateLabel from "../Shared/DateLabel";
+import RenderYAxis from "../Shared/RenderYAxis";
+import RenderXAxis from "../Shared/RenderXAxis";
+import { SVG_HEIGHT, SVG_WIDTH } from "../Shared/Contants";
 import { AccelerationGraphType } from "../../../types/DataTypes";
 import { generateAccelerationCurves } from "../../../utils/Graphs/AccelerationCurves";
 import {
@@ -24,7 +24,7 @@ import {
  *
  * @returns {React.ReactElement} The real-time acceleration graph or a fallback text message.
  */
-export default function Graph() {
+export default function AccelerationPropertiesGraph() {
   // Extract sensor-related values from the context
   const { sensorsData, timeInterval } =
     useContext<SensorContextType>(SensorsContext);

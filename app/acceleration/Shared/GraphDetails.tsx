@@ -56,6 +56,11 @@ export default function GraphDetails({ graphType }: Props) {
             </View>
           ))}
       </View>
+      {graphType == "variance" && (
+        <Text style={styles.info}>
+          0.000 indicates no change in device orientation in last 1 min
+        </Text>
+      )}
     </View>
   );
 }
@@ -82,5 +87,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-around",
+  },
+  info: {
+    textAlign: "center",
+    paddingHorizontal: "5%",
   },
 });

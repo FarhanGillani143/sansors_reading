@@ -16,7 +16,10 @@ export default function _layout() {
           name="history/index"
           options={{ title: "Session History" }}
         />
-        <Stack.Screen name="graphs/index" options={{ title: "Graph" }} />
+        <Stack.Screen
+          name="acceleration/index"
+          options={{ title: "Acceleration" }}
+        />
       </Stack>
     </SensorContextProvider>
   );
