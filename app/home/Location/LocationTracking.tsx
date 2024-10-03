@@ -1,12 +1,18 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, View, Alert } from "react-native";
-import * as Location from "expo-location";
+import * as Location from "expo-location"; // Import Expo's location API
 
 import TextButton from "../../../components/TextButton";
+import { LocationDataType } from "../../../types/DataTypes";
+import { mpsToKph, mpsToMph } from "../../../utils/SpeedConversions"; // Utility functions to convert speed
 import {
   SensorsContext,
   SensorContextType,
-} from "../../../context/SensorContext";
+} from "../../../context/SensorsData/SensorContext"; // Sensor context for sensor-related data
+import {
+  ConfigContextType,
+  ConfigurationContext,
+} from "../../../context/Configuration/ConfigurationContext"; // Configuration context for app configuration data
 
 /**
  * Default position object used to reset the position state
@@ -18,59 +24,75 @@ const emptyPositionObject = {
   heading: 0,
   latitude: 0,
   longitude: 0,
-  speed: 0,
+  speed: "0",
   altitudeAccuracy: 0,
 };
 
 export default function LocationTracking() {
   const {
-    timeInterval,
-    startSensors, // Indicates if sensors should be active
+    startSensors,
     locationPermission,
     updateSensorsData,
     requestLocationPermission,
   } = useContext<SensorContextType>(SensorsContext);
 
-  const [currentPosition, setCurrentPosition] =
-    useState<Location.LocationObjectCoords>(emptyPositionObject);
+  const { speedUnit, sensorTimeInterval } =
+    useContext<ConfigContextType>(ConfigurationContext);
 
+  const [currentPosition, setCurrentPosition] =
+    useState<LocationDataType>(emptyPositionObject); // State to store the current location data
+
+  /**
+   * Converts the raw speed data (in meters per second) to the appropriate unit (KM/H or Miles/H)
+   */
+  const speedCalculation = (speed: number | null) => {
+    if (speed && speed != -1) {
+      // Convert the speed to the configured speed unit
+      if (speedUnit === "mph") return `${mpsToMph(speed).toFixed(2)} Miles/H`;
+      return `${mpsToKph(speed).toFixed(2)} KM/H`;
+    } else {
+      // Default to 0 if speed is null or invalid
+      return `0${speedUnit === "kph" ? " KM/H" : " Miles/H"}`;
+    }
+  };
+
+  /**
+   * Callback function to handle location updates from the Location API.
+   * @param {Location.LocationObject} position - The latest location object.
+   */
   const watchPositionCallback = (position: Location.LocationObject) => {
-    // Convert speed from m/s to km/h
-    const speed =
-      position.coords.speed && position.coords.speed != -1
-        ? position.coords.speed * 3.6
-        : 0;
-    setCurrentPosition({ ...position.coords, speed });
+    const speed = speedCalculation(position.coords.speed); // Calculate speed with unit conversion
+    setCurrentPosition({ ...position.coords, speed }); // Update state with the latest location data
     updateSensorsData({
-      location: { ...position.coords, speed },
+      location: { ...position.coords, speed }, // Update sensor data context with the location and speed
     });
   };
 
-  // Configuration for Location.watchPositionAsync
+  // Configuration options for Location.watchPositionAsync
   const watchPositionConfig = {
-    timeInterval,
+    timeInterval: sensorTimeInterval, // Interval for receiving location updates
     distanceInterval: 0, // Track location updates regardless of the distance moved
-    accuracy: Location.LocationAccuracy.BestForNavigation, // Use the best accuracy available for navigation
+    accuracy: Location.LocationAccuracy.BestForNavigation, // Set the highest accuracy level for navigation purposes
   };
 
-  const subscriptionRef = useRef<Location.LocationSubscription>();
+  const subscriptionRef = useRef<Location.LocationSubscription>(); // Ref to hold the subscription object
 
   useEffect(() => {
     (async () => {
       if (locationPermission && startSensors) {
+        // If location permission is granted and sensors are active, start tracking location
         try {
-          // Start tracking the position if permission is granted and sensors are active
           subscriptionRef.current = await Location.watchPositionAsync(
             watchPositionConfig,
-            watchPositionCallback
+            watchPositionCallback // Use callback to handle position updates
           );
         } catch (error) {
-          Alert.alert("Error", "Unable to track location.");
+          Alert.alert("Error", "Unable to track location."); // Show alert if there's an error
         }
       } else {
-        // Stop tracking the position and reset the position state if sensors are stopped or permission is denied
+        // If sensors are stopped or permission is not granted, stop tracking and reset the position state
         if (subscriptionRef.current) subscriptionRef.current.remove();
-        setCurrentPosition(emptyPositionObject);
+        setCurrentPosition(emptyPositionObject); // Reset location data when sensors stop
       }
     })();
 
@@ -91,7 +113,7 @@ export default function LocationTracking() {
           <Text>Latitude: {currentPosition.latitude.toFixed(4)}°</Text>
           <Text>Longitude: {currentPosition.longitude.toFixed(4)}°</Text>
           <Text>Altitude: {currentPosition.altitude?.toFixed(2)}m</Text>
-          <Text>Speed: {currentPosition.speed?.toFixed(2)} km/h</Text>
+          <Text>Speed: {currentPosition.speed}</Text>
         </View>
       ) : (
         <View style={styles.container}>
@@ -107,6 +129,7 @@ export default function LocationTracking() {
   );
 }
 
+// Styles for the component
 const styles = StyleSheet.create({
   container: {
     gap: 5,
@@ -114,7 +137,7 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#e1bee7",
+    backgroundColor: "#e1bee7", // Light purple background color
   },
   title: {
     fontSize: 18,

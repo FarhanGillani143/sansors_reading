@@ -4,79 +4,41 @@ import * as FileSystem from "expo-file-system";
 import { convertArrayToCSV } from "./ArrayToCSV";
 import { StoreSessionData } from "../types/FunctionTypes";
 
-// Define the file path for storing the sensor time interval in the app's document directory.
-const sensorTimeIntervalUri =
-  FileSystem.documentDirectory + "sensorTimeInterval";
+type StoreValueType = {
+  value: any; // The value to be stored (could be any type).
+  key: string; // The unique key to associate with the stored value.
+};
 
 /**
- * Asynchronously stores the sensor time interval in a file.
- * The interval is stored as a JSON string in the app's document directory.
+ * Stores a value asynchronously in the local filesystem using the provided key.
  *
- * @param {number} interval - The time interval (in milliseconds) to be stored.
+ * @param {StoreValueType} params - An object containing the value to store and the associated key.
+ * @param {any} params.value - The value to be stored. It can be of any type.
+ * @param {string} params.key - The key used to associate the stored value.
+ * @returns {Promise<void>} - A promise that resolves once the value is stored.
  */
-export const storeTimeIntervalAsync = async (interval: number) => {
+export const storeValueAsync = async ({ value, key }: StoreValueType) => {
+  const uriPath = FileSystem.documentDirectory + `${key}`; // Defines the storage path using the key
   try {
-    await FileSystem.writeAsStringAsync(
-      sensorTimeIntervalUri,
-      JSON.stringify(interval)
-    );
+    await FileSystem.writeAsStringAsync(uriPath, JSON.stringify(value)); // Convert the value to a string and store it
   } catch (error: any) {
-    Alert.alert("Error Saving New Time Interval", error.message);
+    Alert.alert("Error while saving value!", error.message); // Show an error alert if the operation fails
   }
 };
 
 /**
- * Asynchronously retrieves the sensor time interval from the file.
- * The interval is parsed from a JSON string and returned as a number.
+ * Retrieves a value asynchronously from the local filesystem using the provided key.
  *
- * @returns {Promise<number | false>} - The retrieved time interval or `false` if an error occurs.
+ * @param {string} key - The unique key associated with the stored value.
+ * @returns {Promise<any | boolean>} - A promise that resolves with the stored value, or `false` if an error occurs.
  */
-export const retrieveTimeIntervalAsync = async (): Promise<number | false> => {
+export const retrieveValueAsync = async (key: string) => {
+  const uriPath = FileSystem.documentDirectory + `${key}`; // Defines the path from which to retrieve the value
   try {
-    const fileContent = await FileSystem.readAsStringAsync(
-      sensorTimeIntervalUri
-    );
-    return Number(JSON.parse(fileContent));
+    const fileContent = await FileSystem.readAsStringAsync(uriPath); // Read the content from the file
+    return JSON.parse(fileContent); // Parse the stored value and return it
   } catch (error) {
-    return false;
-  }
-};
-
-/**
- * Asynchronously stores the list of session names in a file.
- * The session names are stored as a JSON string in the app's document directory.
- *
- * @param {string[]} sessionNames - The array of session names to be stored.
- * @returns {Promise<boolean>} - Returns `true` if storage is successful, otherwise `false`.
- */
-export const storeSessionNames = async (
-  sessionNames: string[]
-): Promise<boolean> => {
-  const sessionNamesUri = FileSystem.documentDirectory + "sessionNames";
-  try {
-    await FileSystem.writeAsStringAsync(
-      sessionNamesUri,
-      JSON.stringify(sessionNames)
-    );
-    return true;
-  } catch (error: any) {
-    Alert.alert("Error Storing Session Names", error.message);
-    return false;
-  }
-};
-
-/**
- * Asynchronously retrieves the list of session names from the file.
- *
- * @returns {Promise<string[] | false>} - The array of session names or `false` if an error occurs.
- */
-export const retrieveSessionNames = async (): Promise<string[] | false> => {
-  const sessionNamesUri = FileSystem.documentDirectory + "sessionNames";
-  try {
-    const fileContent = await FileSystem.readAsStringAsync(sessionNamesUri);
-    return JSON.parse(fileContent) as string[];
-  } catch (error: any) {
-    return false;
+    return false; // Return `false` if the file can't be read (e.g., file doesn't exist)
   }
 };
 

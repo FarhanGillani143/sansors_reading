@@ -5,7 +5,11 @@ import { Accelerometer } from "expo-sensors";
 import {
   SensorsContext,
   SensorContextType,
-} from "../../../context/SensorContext";
+} from "../../../context/SensorsData/SensorContext";
+import {
+  ConfigContextType,
+  ConfigurationContext,
+} from "../../../context/Configuration/ConfigurationContext";
 
 interface AccelerationDataType {
   x: number | undefined;
@@ -36,12 +40,11 @@ export default function AccelerometerSensor() {
     z: 0,
   });
 
-  const {
-    startSensors,
-    timeInterval,
-    updateSensorsData,
-    isAccelerometerAvailable,
-  } = useContext<SensorContextType>(SensorsContext);
+  const { startSensors, updateSensorsData, isAccelerometerAvailable } =
+    useContext<SensorContextType>(SensorsContext);
+
+  const { sensorTimeInterval } =
+    useContext<ConfigContextType>(ConfigurationContext);
 
   /**
    * Stops tracking by removing all accelerometer listeners and resetting state.
@@ -56,7 +59,7 @@ export default function AccelerometerSensor() {
    * to handle accelerometer data updates.
    */
   const startTracking = () => {
-    Accelerometer.setUpdateInterval(timeInterval);
+    Accelerometer.setUpdateInterval(sensorTimeInterval);
     Accelerometer.addListener((data) => {
       setCurrentAcceleration(data);
       updateSensorsData({ acceleration: data }); // Call the external updateData function with the latest data

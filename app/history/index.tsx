@@ -3,7 +3,10 @@ import { FlatList, StyleSheet, Text, View } from "react-native";
 
 import TextButton from "../../components/TextButton";
 import { retrieveSessionData } from "../../utils/ManageStorage";
-import { SensorContextType, SensorsContext } from "../../context/SensorContext";
+import {
+  SensorsContext,
+  SensorContextType,
+} from "../../context/SensorsData/SensorContext";
 
 export default function SessionHistory() {
   const { allSessions } = useContext<SensorContextType>(SensorsContext);

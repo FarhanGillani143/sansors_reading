@@ -25,7 +25,7 @@ export const renderItem = ({ item }: { item: SensorDataType }) => {
       <View style={styles.borderline}></View>
       <View style={styles.dataPoints}>
         <Text>Altitude: {item.locationData?.altitude?.toFixed(2)}m</Text>
-        <Text>Speed: {item.locationData?.speed?.toFixed(3)}km/h</Text>
+        <Text>Speed: {item.locationData?.speed}</Text>
       </View>
     </View>
   );

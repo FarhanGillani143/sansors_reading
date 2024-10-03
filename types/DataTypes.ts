@@ -6,7 +6,9 @@ import { AccelerometerMeasurement } from "expo-sensors";
  * as timestamps will be manually added when tracking the data.
  */
 export type AccelerometerDataType = Omit<AccelerometerMeasurement, "timestamp">;
-
+export type LocationDataType = Omit<Location.LocationObjectCoords, "speed"> & {
+  speed: string;
+};
 /**
  * Type representing the sensor data, which includes manually added timestamps,
  * accelerometer data, and optional location data.
@@ -15,7 +17,7 @@ export type SensorDataType = {
   timeDateObject: Date; // Date object to capture the actual time the sensor data is recorded
   timestamp: string; // Manually added timestamp in string format for display or logging
   accelerationData: AccelerometerDataType | undefined; // Accelerometer data (x, y, z axes) without timestamp
-  locationData: Location.LocationObjectCoords | undefined; // Optional location data if available (latitude, longitude, etc.)
+  locationData: LocationDataType | undefined; // Optional location data if available (latitude, longitude, etc.)
 };
 
 /**
@@ -61,4 +63,9 @@ export type VarianceGraphType = {
 export type VarianceDataType = {
   variance: number; // Mean Variance of Acceleration values
   timestamp: Date;
+};
+
+export type SpeedDataType = {
+  speed: number;
+  unit: "kph" | "mph";
 };

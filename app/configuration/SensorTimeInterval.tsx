@@ -2,7 +2,10 @@ import React, { useContext } from "react";
 import { Text, View, StyleSheet } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 
-import { SensorsContext, SensorContextType } from "../../context/SensorContext";
+import {
+  ConfigContextType,
+  ConfigurationContext,
+} from "../../context/Configuration/ConfigurationContext";
 
 type OptionType = {
   label: string;
@@ -23,15 +26,15 @@ const timeIntervalOptions: OptionType[] = [
 ];
 
 export default function SensorTimeInterval() {
-  const { timeInterval, updateTimeIntervalAsync } =
-    useContext<SensorContextType>(SensorsContext);
+  const { sensorTimeInterval, updateTimeIntervalAsync } =
+    useContext<ConfigContextType>(ConfigurationContext);
 
   /**
    * Applies a new time interval for sensor data collection.
    */
   const applyNewInterval = async ({ label, value }: OptionType) => {
     // If the new value is different from the current interval, update it
-    if (value !== timeInterval) {
+    if (value !== sensorTimeInterval) {
       await updateTimeIntervalAsync(value);
     }
   };
@@ -45,7 +48,7 @@ export default function SensorTimeInterval() {
         labelField="label" // Field name for the displayed label
         valueField="value" // Field name for the actual value
         data={timeIntervalOptions} // Available time interval options
-        placeholder={`${timeInterval / 1000}s`} // Show the current interval in seconds
+        placeholder={`${sensorTimeInterval / 1000}s`} // Show the current interval in seconds
         onChange={applyNewInterval} // Update the interval when an option is selected
       />
     </View>

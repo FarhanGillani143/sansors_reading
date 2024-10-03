@@ -4,7 +4,10 @@ import { View, Text, StyleSheet, FlatList } from "react-native";
 import { renderItem } from "./RenderItem";
 import { downloadCSV } from "../../utils/ArrayToCSV";
 import TextButton from "../../components/TextButton";
-import { SensorContextType, SensorsContext } from "../../context/SensorContext";
+import {
+  SensorContextType,
+  SensorsContext,
+} from "../../context/SensorsData/SensorContext";
 
 const EmptyListComponent = (
   <View style={{ alignItems: "center" }}>

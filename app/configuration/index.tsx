@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import {
   Text,
   View,
@@ -8,21 +8,58 @@ import {
   KeyboardAvoidingView,
 } from "react-native";
 
-import RadioButtonGroup from "./RadioButtonGroup";
-import SettingsInputField from "./SettingsInputField";
-import SensorTimeInterval from "./SensorTimeInterval";
+import RadioButtonGroup from "./RadioButtonGroup"; // Custom component for rendering radio button groups
+import SettingsInputField from "./SettingsInputField"; // Custom component for rendering input fields
+import SensorTimeInterval from "./SensorTimeInterval"; // Custom component to set the sensor time interval
+import { SpeedDataType } from "../../types/DataTypes"; // Type definition for speed data
+import { kphToMph, mphToKph } from "../../utils/SpeedConversions"; // Utility functions for converting speed units
+import {
+  ConfigContextType,
+  ConfigurationContext,
+} from "../../context/Configuration/ConfigurationContext"; // Context for managing configuration settings
 
-const speedUnitOptions = [
+// Speed unit options for the radio button group
+const speedUnitOptions: { label: string; value: "kph" | "mph" }[] = [
   { label: "KM/H", value: "kph" },
   { label: "Miles/H", value: "mph" },
 ];
 
+// Options for whether or not to display the comfort graph
 const comfortGraphOptions = [
   { label: "Yes", value: true },
   { label: "No", value: false },
 ];
 
 export default function Configuration() {
+  const {
+    speedUnit,
+    displayGraph,
+    warningSpeed,
+    accelerationEndSpeed,
+    accelerationStartSpeed,
+    updateSpeedUnit,
+    updateWarningSpeed,
+    updateDisplayGraph,
+    updateAccelerationEndSpeed,
+    updateAccelerationStartSpeed,
+  } = useContext<ConfigContextType>(ConfigurationContext);
+
+  /**
+   * Converts and formats the speed value based on the selected speed unit.
+   */
+  const speedValue = (speedData: SpeedDataType) => {
+    let speed: string; // toFixed returns a string
+
+    // If the current speed unit matches the speed data's unit, no conversion is needed
+    if (speedData.unit === speedUnit) speed = speedData.speed.toFixed(0);
+    // Convert mph to kph if the unit is kph
+    else if (speedUnit === "kph") speed = mphToKph(speedData.speed).toFixed(0);
+    // Convert kph to mph if the unit is mph
+    else speed = kphToMph(speedData.speed).toFixed(0);
+
+    return Number(speed); // Convert the string back to a number
+  };
+
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -31,25 +68,52 @@ export default function Configuration() {
     >
       <ScrollView>
         <View style={styles.container}>
+          {/* Component to set sensor time interval */}
           <SensorTimeInterval />
-          <View style={styles.property}>
-            <Text style={styles.description}>Unit of Speed</Text>
-            <RadioButtonGroup style={{ gap: 20 }} options={speedUnitOptions} />
-          </View>
+
+          {/* Section for enabling/disabling the Drive Comfort Graph */}
           <View style={[styles.property, styles.column]}>
             <Text style={styles.description}>Display Drive Comfort Graph?</Text>
             <RadioButtonGroup
-              style={{ width: "60%" }}
+              value={displayGraph}
               options={comfortGraphOptions}
+              getSelectedValue={updateDisplayGraph}
             />
           </View>
-          <SettingsInputField description="Warning Speed Limit" />
+
+          {/* Section for selecting the speed unit (KM/H or Miles/H) */}
+          <View style={styles.property}>
+            <Text style={styles.description}>Unit of Speed</Text>
+            <RadioButtonGroup
+              value={speedUnit}
+              options={speedUnitOptions}
+              getSelectedValue={updateSpeedUnit}
+            />
+          </View>
+
+          {/* Input field for the warning speed limit */}
+          <SettingsInputField
+            value={speedValue(warningSpeed)}
+            speedUnit={speedUnit}
+            getSelectedValue={updateWarningSpeed}
+            description="Warning Speed Limit"
+          />
+
+          {/* Input field for acceleration start speed */}
           <SettingsInputField
             style={styles.column}
+            speedUnit={speedUnit}
+            value={speedValue(accelerationStartSpeed)}
+            getSelectedValue={updateAccelerationStartSpeed}
             description="Measure Acceleration Start Speed"
           />
+
+          {/* Input field for acceleration end speed */}
           <SettingsInputField
             style={styles.column}
+            speedUnit={speedUnit}
+            value={speedValue(accelerationEndSpeed)}
+            getSelectedValue={updateAccelerationEndSpeed}
             description="Measure Acceleration End Speed"
           />
         </View>
@@ -58,6 +122,7 @@ export default function Configuration() {
   );
 }
 
+// Styles for the components
 const styles = StyleSheet.create({
   container: {
     gap: 5,

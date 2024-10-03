@@ -5,7 +5,10 @@ import TextButton from "../../components/TextButton";
 import LocationTracking from "./Location/LocationTracking";
 import NavigationLink from "../../components/NavigationButton";
 import AccelerometerSensor from "./Accelerometer/Accelerometer";
-import { SensorContextType, SensorsContext } from "../../context/SensorContext";
+import {
+  SensorContextType,
+  SensorsContext,
+} from "../../context/SensorsData/SensorContext";
 
 /**
  * Home Component - Main dashboard for displaying sensor data and navigation controls.

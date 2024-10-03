@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import {
   Text,
   View,
@@ -10,23 +10,41 @@ import {
 } from "react-native";
 
 interface Props {
+  value: number;
   description: string;
+  speedUnit: "kph" | "mph";
   style?: StyleProp<ViewStyle>;
+  getSelectedValue(speed: number): void;
 }
 
-export default function SettingsInputField({ description, style }: Props) {
+export default function SettingsInputField({
+  style,
+  value,
+  speedUnit,
+  description,
+  getSelectedValue,
+}: Props) {
+  const selectedValueRef = useRef<number>(value);
+
+  const handleChange = (text: string) =>
+    (selectedValueRef.current = Number(text));
+
   return (
     <View style={[styles.container, style]}>
       <Text style={styles.description}>{description}</Text>
       <View style={styles.valueBox}>
         <TextInput
           style={styles.inputField}
-          placeholder="100"
+          placeholder={`${value}`}
           returnKeyType="done"
           keyboardType="number-pad"
           placeholderTextColor={"silver"}
+          onBlur={() => getSelectedValue(selectedValueRef.current)}
+          onChange={(changeEvent) => handleChange(changeEvent.nativeEvent.text)}
         />
-        <Text style={{ fontSize: 14 }}>{"KM/H"}</Text>
+        <Text style={{ fontSize: 14 }}>
+          {speedUnit === "kph" ? "KM/H" : "Miles/H"}
+        </Text>
       </View>
     </View>
   );
@@ -51,6 +69,7 @@ const styles = StyleSheet.create({
   },
   inputField: {
     borderWidth: 1,
+    textAlign: 'center',
     borderColor: "black",
     paddingHorizontal: 20,
     paddingVertical: Platform.OS === "ios" ? 5 : 0,

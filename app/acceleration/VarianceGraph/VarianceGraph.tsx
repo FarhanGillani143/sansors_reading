@@ -12,7 +12,7 @@ import { calculateMeanVariance } from "../../../utils/Graphs/CalculateVariance";
 import {
   SensorsContext,
   SensorContextType,
-} from "../../../context/SensorContext";
+} from "../../../context/SensorsData/SensorContext";
 
 interface Props {
   recordsLimit: number;

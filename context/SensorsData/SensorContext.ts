@@ -1,6 +1,6 @@
 import { createContext } from "react";
-import { UpdateSensorsData } from "../types/FunctionTypes";
-import { SensorDataType, VarianceDataType } from "../types/DataTypes";
+import { UpdateSensorsData } from "../../types/FunctionTypes";
+import { SensorDataType, VarianceDataType } from "../../types/DataTypes";
 
 /**
  * Context to manage and provide sensor-related state, including accelerometer and location data.
@@ -10,7 +10,6 @@ export const SensorsContext = createContext<SensorContextType>({
   sensorsData: [],
   varianceData: [],
   startSensors: false,
-  timeInterval: 200,
   locationPermission: false,
   sessionStartTime: undefined,
   sessionEndTime: undefined,
@@ -21,7 +20,6 @@ export const SensorsContext = createContext<SensorContextType>({
   updateVarianceData(data) {},
   updateSensorsData() {},
   requestLocationPermission() {},
-  async updateTimeIntervalAsync(interval) {},
 });
 
 /**
@@ -47,11 +45,6 @@ export interface SensorContextType {
    * Array of sensor data records (accelerometer and location).
    */
   sensorsData: SensorDataType[];
-
-  /**
-   * Time interval for sensor data collection.
-   */
-  timeInterval: number;
 
   /**
    * Flag indicating if location permission has been granted.
@@ -96,14 +89,6 @@ export interface SensorContextType {
    * @param {UpdateSensorsData} params - Object containing the accelerometer and/or location data to be updated.
    */
   updateSensorsData: (params: UpdateSensorsData) => void;
-
-  /**
-   * Function to update the time interval asynchronously.
-   *
-   * @param {number} interval - The new time interval to be set.
-   * @returns {Promise<void>} - A promise that resolves once the time interval is updated.
-   */
-  updateTimeIntervalAsync: (interval: number) => Promise<void>;
 
   /**
    * Function to request location permission from the user.

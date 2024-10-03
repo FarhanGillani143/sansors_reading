@@ -8,7 +8,14 @@ import { AccelerationParams } from "../../routes/Params";
 import ProgressIndicator from "./Shared/ProgressIndicator";
 import AccelerationVarianceGraph from "./VarianceGraph/VarianceGraph";
 import { ShowAccelerationData } from "../home/Accelerometer/Accelerometer";
-import { SensorContextType, SensorsContext } from "../../context/SensorContext";
+import {
+  SensorsContext,
+  SensorContextType,
+} from "../../context/SensorsData/SensorContext";
+import {
+  ConfigContextType,
+  ConfigurationContext,
+} from "../../context/Configuration/ConfigurationContext";
 
 /**
  * AccelerationGraph component renders the acceleration graph and provides controls to
@@ -18,16 +25,19 @@ import { SensorContextType, SensorsContext } from "../../context/SensorContext";
  * @returns {React.ReactElement} The acceleration graph UI with the start/stop tracking functionality.
  */
 export default function AccelerationGraph() {
-  const { sensorsData, timeInterval, startSensors, sensorsController } =
+  const { sensorsData, startSensors, sensorsController } =
     useContext<SensorContextType>(SensorsContext);
+
+  const { sensorTimeInterval } =
+    useContext<ConfigContextType>(ConfigurationContext);
 
   const { graphType } = useLocalSearchParams<AccelerationParams>();
 
   const latestReading = sensorsData[0].accelerationData;
-  const recordsLimit = useRef<number>(60000 / timeInterval).current;
+  const recordsLimit = useRef<number>(60000 / sensorTimeInterval).current;
   // Track remaining time for generating the graph
   const remainingTimeToGenerateRef = useRef<number>(
-    timeInterval * sensorsData.length
+    sensorTimeInterval * sensorsData.length
   );
 
   return (

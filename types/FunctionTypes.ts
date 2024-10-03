@@ -1,5 +1,8 @@
-import * as Location from "expo-location";
-import { AccelerometerDataType, SensorDataType } from "./DataTypes";
+import {
+  SensorDataType,
+  LocationDataType,
+  AccelerometerDataType,
+} from "./DataTypes";
 
 /**
  * Type representing the structure for storing session data.
@@ -34,7 +37,7 @@ export type UpdateSensorsData = {
    * This data is retrieved using the Expo Location API and can include latitude,
    * longitude, altitude, and other relevant location information.
    */
-  location?: Location.LocationObjectCoords;
+  location?: LocationDataType;
 };
 
 export type UpdateMinMaxType = {

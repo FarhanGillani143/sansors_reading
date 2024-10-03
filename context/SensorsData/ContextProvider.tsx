@@ -1,25 +1,23 @@
 import React, { useEffect, useRef, useState } from "react";
 import { AppState, AppStateStatus } from "react-native";
-import * as Location from "expo-location";
 import { Accelerometer } from "expo-sensors";
 import { activateKeepAwakeAsync, deactivateKeepAwake } from "expo-keep-awake";
 
 import { SensorsContext } from "./SensorContext";
-import { UpdateSensorsData } from "../types/FunctionTypes";
-import dateTimeStringWithMilliseconds from "../utils/dateTimeStringwithMs";
-import { requestLocatonPermissionAsync } from "../utils/LocationPermission";
+import { UpdateSensorsData } from "../../types/FunctionTypes";
+import dateTimeStringWithMilliseconds from "../../utils/dateTimeStringwithMs";
+import { requestLocatonPermissionAsync } from "../../utils/LocationPermission";
 import {
   SensorDataType,
-  AccelerometerDataType,
   VarianceDataType,
-} from "../types/DataTypes";
+  AccelerometerDataType,
+  LocationDataType,
+} from "../../types/DataTypes";
 import {
+  storeValueAsync,
   storeSessionData,
-  storeSessionNames,
-  retrieveSessionNames,
-  storeTimeIntervalAsync,
-  retrieveTimeIntervalAsync,
-} from "../utils/ManageStorage";
+  retrieveValueAsync,
+} from "../../utils/ManageStorage";
 
 type PropsType = {
   children: JSX.Element | JSX.Element[];
@@ -38,9 +36,6 @@ export default function SensorContextProvider({ children }: PropsType) {
 
   /** State to track whether sensors should be active */
   const [startSensors, setStartSensors] = useState<boolean>(false);
-
-  /** Time interval property for sensors */
-  const [timeInterval, setTimeInterval] = useState<number>(200);
 
   /** Contains names of all the sessions recorded so far */
   const [allSessions, setAllSessions] = useState<string[]>([]);
@@ -67,7 +62,10 @@ export default function SensorContextProvider({ children }: PropsType) {
       const isStored = await storeSessionData({ sessionName, sensorsData });
 
       if (isStored) {
-        await storeSessionNames([sessionName, ...allSessions]);
+        await storeValueAsync({
+          key: "sessionNames",
+          value: [sessionName, ...allSessions],
+        });
       }
     } else {
       setSensorsData([]); // Clear previous session data when starting a new session.
@@ -76,21 +74,11 @@ export default function SensorContextProvider({ children }: PropsType) {
     }
   };
 
-  /**
-   * Updates the time interval for sensor data collection and stores it locally.
-   *
-   * @param {number} interval - The new time interval to be set.
-   */
-  const updateTimeIntervalAsync = async (interval: number) => {
-    setTimeInterval(interval);
-    await storeTimeIntervalAsync(interval); // Persist the interval setting for future sessions.
-  };
-
   const updateVarianceData = (data: VarianceDataType) => {
     varianceDataRef.current.push(data);
   };
 
-  let locationData: Location.LocationObjectCoords | undefined;
+  let locationData: LocationDataType | undefined;
   let accelerationData: AccelerometerDataType | undefined;
 
   /**
@@ -166,10 +154,7 @@ export default function SensorContextProvider({ children }: PropsType) {
         await requestLocationPermission();
       }
 
-      const sensorTimeInterval = await retrieveTimeIntervalAsync();
-      if (sensorTimeInterval) setTimeInterval(sensorTimeInterval);
-
-      const sessionNames = await retrieveSessionNames();
+      const sessionNames: string[] = await retrieveValueAsync("sessionNames");
       if (sessionNames) setAllSessions(sessionNames);
     })();
   }, []);
@@ -219,7 +204,6 @@ export default function SensorContextProvider({ children }: PropsType) {
         sensorsData,
         allSessions,
         startSensors,
-        timeInterval,
         sessionEndTime,
         sessionStartTime,
         locationPermission,
@@ -229,7 +213,6 @@ export default function SensorContextProvider({ children }: PropsType) {
         sensorsController,
         updateSensorsData,
         updateVarianceData,
-        updateTimeIntervalAsync,
         requestLocationPermission,
       }}
     >
