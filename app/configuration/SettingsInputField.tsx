@@ -14,7 +14,7 @@ interface Props {
   description: string;
   speedUnit: "kph" | "mph";
   style?: StyleProp<ViewStyle>;
-  getSelectedValue(speed: number): void;
+  updateSelectedValue(speed: number): void;
 }
 
 export default function SettingsInputField({
@@ -22,24 +22,32 @@ export default function SettingsInputField({
   value,
   speedUnit,
   description,
-  getSelectedValue,
+  updateSelectedValue,
 }: Props) {
-  const selectedValueRef = useRef<number>(value);
+  const inputValueRef = useRef<string>(value.toString());
+  const textInputRef = useRef<TextInput>(null);
 
-  const handleChange = (text: string) =>
-    (selectedValueRef.current = Number(text));
+  const handleChange = (text: string) => (inputValueRef.current = text);
+
+  const handleOnBlur = () => {
+    if (inputValueRef.current)
+      updateSelectedValue(Number(inputValueRef.current));
+
+    textInputRef.current?.clear();
+  };
 
   return (
     <View style={[styles.container, style]}>
       <Text style={styles.description}>{description}</Text>
       <View style={styles.valueBox}>
         <TextInput
+          ref={textInputRef}
           style={styles.inputField}
           placeholder={`${value}`}
           returnKeyType="done"
           keyboardType="number-pad"
           placeholderTextColor={"silver"}
-          onBlur={() => getSelectedValue(selectedValueRef.current)}
+          onBlur={handleOnBlur}
           onChange={(changeEvent) => handleChange(changeEvent.nativeEvent.text)}
         />
         <Text style={{ fontSize: 14 }}>
@@ -69,7 +77,7 @@ const styles = StyleSheet.create({
   },
   inputField: {
     borderWidth: 1,
-    textAlign: 'center',
+    textAlign: "center",
     borderColor: "black",
     paddingHorizontal: 20,
     paddingVertical: Platform.OS === "ios" ? 5 : 0,

@@ -95,7 +95,7 @@ export default function Configuration() {
           <SettingsInputField
             value={speedValue(warningSpeed)}
             speedUnit={speedUnit}
-            getSelectedValue={updateWarningSpeed}
+            updateSelectedValue={updateWarningSpeed}
             description="Warning Speed Limit"
           />
 
@@ -104,7 +104,7 @@ export default function Configuration() {
             style={styles.column}
             speedUnit={speedUnit}
             value={speedValue(accelerationStartSpeed)}
-            getSelectedValue={updateAccelerationStartSpeed}
+            updateSelectedValue={updateAccelerationStartSpeed}
             description="Measure Acceleration Start Speed"
           />
 
@@ -113,7 +113,7 @@ export default function Configuration() {
             style={styles.column}
             speedUnit={speedUnit}
             value={speedValue(accelerationEndSpeed)}
-            getSelectedValue={updateAccelerationEndSpeed}
+            updateSelectedValue={updateAccelerationEndSpeed}
             description="Measure Acceleration End Speed"
           />
         </View>
