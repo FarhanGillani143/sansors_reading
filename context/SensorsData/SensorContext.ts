@@ -4,22 +4,15 @@ import { SensorDataType, VarianceDataType } from "../../types/DataTypes";
 
 /**
  * Context to manage and provide sensor-related state, including accelerometer and location data.
- * The context offers functions to control sensors and update their data, and initializes with default values.
+ * The context offers functions to control sensors, update their data, and initializes with default values.
  */
 export const SensorsContext = createContext<SensorContextType>({
-  sensorsData: [],
-  varianceData: [],
-  startSensors: false,
-  locationPermission: false,
-  sessionStartTime: undefined,
-  sessionEndTime: undefined,
-  allSessions: [],
-  noSensorAvailable: false,
-  isAccelerometerAvailable: false,
-  sensorsController() {},
-  updateVarianceData(data) {},
-  updateSensorsData() {},
-  requestLocationPermission() {},
+  sensorsData: [], // Initial empty array for sensor data
+  varianceData: [], // Initial empty array for variance data
+  emptySessionData() {}, // Default empty session data function
+  updateVarianceData(data) {}, // Default update variance data function
+  updateSensorsData() {}, // Default update sensor data function
+  storeSessionDataAsync: async () => true, // Default async function to store session data
 });
 
 /**
@@ -32,49 +25,14 @@ export interface SensorContextType {
   varianceData: VarianceDataType[];
 
   /**
-   * Flag to indicate if no sensor is available.
-   */
-  noSensorAvailable: boolean;
-
-  /**
-   * Flag indicating if the accelerometer sensor is available.
-   */
-  isAccelerometerAvailable: boolean;
-
-  /**
    * Array of sensor data records (accelerometer and location).
    */
   sensorsData: SensorDataType[];
 
   /**
-   * Flag indicating if location permission has been granted.
+   * Function to clear the current session's sensor data and variance data.
    */
-  locationPermission: boolean;
-
-  /**
-   * Flag to indicate whether the sensors should be active.
-   */
-  startSensors: boolean;
-
-  /**
-   * The start time of the current sensor session, if any.
-   */
-  sessionStartTime: Date | undefined;
-
-  /**
-   * The end time of the current sensor session, if any.
-   */
-  sessionEndTime: Date | undefined;
-
-  /**
-   * Array storing the names of all the recorded sessions.
-   */
-  allSessions: string[];
-
-  /**
-   * Function to toggle the sensor's active state.
-   */
-  sensorsController: VoidFunction;
+  emptySessionData: VoidFunction;
 
   /**
    * Function to update variance data in the context.
@@ -91,7 +49,9 @@ export interface SensorContextType {
   updateSensorsData: (params: UpdateSensorsData) => void;
 
   /**
-   * Function to request location permission from the user.
+   * Asynchronous function to store the current session data.
+   *
+   * @returns {Promise<boolean>} - A promise that resolves to indicate success or failure of the storage operation.
    */
-  requestLocationPermission: VoidFunction;
+  storeSessionDataAsync: () => Promise<boolean>;
 }

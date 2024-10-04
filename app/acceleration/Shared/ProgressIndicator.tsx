@@ -12,7 +12,7 @@ const CIRCLE_CIRCUMFERENCE = 2 * Math.PI * CIRCLE_RADIUS; // The circumference o
 // Creating an animated version of the SVG Circle component
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
-export default function ProgressIndicator({ remainingTime }: Props) {
+const ProgressIndicator = React.memo(({ remainingTime }: Props) => {
   // Animated value to track the progress (0 to 100)
   const progressAnim = useRef(new Animated.Value(0)).current;
 
@@ -67,7 +67,7 @@ export default function ProgressIndicator({ remainingTime }: Props) {
       </View>
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {
@@ -86,3 +86,5 @@ const styles = StyleSheet.create({
     textAlign: "center", // Center-align text
   },
 });
+
+export default ProgressIndicator;

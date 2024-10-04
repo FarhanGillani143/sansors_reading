@@ -13,6 +13,10 @@ import {
   ConfigContextType,
   ConfigurationContext,
 } from "../../../context/Configuration/ConfigurationContext"; // Configuration context for app configuration data
+import {
+  SensorsConfigContext,
+  SensorsConfigContextType,
+} from "../../../context/SensorsConfig/ConfigContext";
 
 /**
  * Default position object used to reset the position state
@@ -29,12 +33,10 @@ const emptyPositionObject = {
 };
 
 export default function LocationTracking() {
-  const {
-    startSensors,
-    locationPermission,
-    updateSensorsData,
-    requestLocationPermission,
-  } = useContext<SensorContextType>(SensorsContext);
+  const { updateSensorsData } = useContext<SensorContextType>(SensorsContext);
+
+  const { startSensors, locationPermission, requestLocationPermission } =
+    useContext<SensorsConfigContextType>(SensorsConfigContext);
 
   const { speedUnit, sensorTimeInterval } =
     useContext<ConfigContextType>(ConfigurationContext);
@@ -58,7 +60,6 @@ export default function LocationTracking() {
 
   /**
    * Callback function to handle location updates from the Location API.
-   * @param {Location.LocationObject} position - The latest location object.
    */
   const watchPositionCallback = (position: Location.LocationObject) => {
     const speed = speedCalculation(position.coords.speed); // Calculate speed with unit conversion

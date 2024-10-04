@@ -10,6 +10,10 @@ import {
   ConfigContextType,
   ConfigurationContext,
 } from "../../../context/Configuration/ConfigurationContext";
+import {
+  SensorsConfigContext,
+  SensorsConfigContextType,
+} from "../../../context/SensorsConfig/ConfigContext";
 
 interface AccelerationDataType {
   x: number | undefined;
@@ -40,8 +44,10 @@ export default function AccelerometerSensor() {
     z: 0,
   });
 
-  const { startSensors, updateSensorsData, isAccelerometerAvailable } =
-    useContext<SensorContextType>(SensorsContext);
+  const { updateSensorsData } = useContext<SensorContextType>(SensorsContext);
+
+  const { startSensors, isAccelerometerAvailable } =
+    useContext<SensorsConfigContextType>(SensorsConfigContext);
 
   const { sensorTimeInterval } =
     useContext<ConfigContextType>(ConfigurationContext);

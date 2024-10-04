@@ -5,8 +5,8 @@ import { renderItem } from "./RenderItem";
 import { downloadCSV } from "../../utils/ArrayToCSV";
 import TextButton from "../../components/TextButton";
 import {
-  SensorContextType,
   SensorsContext,
+  SensorContextType,
 } from "../../context/SensorsData/SensorContext";
 
 const EmptyListComponent = (

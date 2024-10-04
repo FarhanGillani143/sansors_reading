@@ -4,12 +4,13 @@ import { FlatList, StyleSheet, Text, View } from "react-native";
 import TextButton from "../../components/TextButton";
 import { retrieveSessionData } from "../../utils/ManageStorage";
 import {
-  SensorsContext,
-  SensorContextType,
-} from "../../context/SensorsData/SensorContext";
+  SensorsConfigContext,
+  SensorsConfigContextType,
+} from "../../context/SensorsConfig/ConfigContext";
 
 export default function SessionHistory() {
-  const { allSessions } = useContext<SensorContextType>(SensorsContext);
+  const { allSessions } =
+    useContext<SensorsConfigContextType>(SensorsConfigContext);
 
   const EmptyListComponent = (
     <View style={{ alignItems: "center" }}>

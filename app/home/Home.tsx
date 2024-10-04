@@ -1,4 +1,4 @@
-import React, { useCallback, useContext } from "react";
+import React, { useContext, useMemo } from "react";
 import { Text, View, StyleSheet } from "react-native";
 
 import TextButton from "../../components/TextButton";
@@ -9,38 +9,54 @@ import {
   SensorContextType,
   SensorsContext,
 } from "../../context/SensorsData/SensorContext";
+import {
+  SensorsConfigContext,
+  SensorsConfigContextType,
+} from "../../context/SensorsConfig/ConfigContext";
 
 /**
  * Home Component - Main dashboard for displaying sensor data and navigation controls.
  */
 export default function Home() {
+  const { sensorsData, emptySessionData, storeSessionDataAsync } =
+    useContext<SensorContextType>(SensorsContext);
+
   const {
-    sensorsData,
     allSessions,
     startSensors,
     sessionEndTime,
     sessionStartTime,
     noSensorAvailable,
     sensorsController,
-  } = useContext<SensorContextType>(SensorsContext);
+  } = useContext<SensorsConfigContextType>(SensorsConfigContext);
 
   /**
    * Determines whether to show the "View This Session's Readings" button
    * based on whether tracking has stopped and data is available.
    */
-  const dataButtonCheck = useCallback(
+  const showDataButton = useMemo(
     () => !startSensors && sensorsData.length > 0,
-    [startSensors, sensorsData]
+    [startSensors]
   );
 
   /**
    * Determines whether to show the "View All Sessions" button
    * based on whether tracking has stopped and session history exists.
    */
-  const historyButtonCheck = useCallback(
+  const showHistoryButton = useMemo(
     () => !startSensors && allSessions.length > 0,
     [startSensors, allSessions]
   );
+
+  const handleSensorsControl = async () => {
+    if (startSensors) {
+      sensorsController();
+      await storeSessionDataAsync();
+    } else {
+      emptySessionData();
+      sensorsController();
+    }
+  };
 
   // Button title showing the number of readings available in the current session
   const buttonTitle = `View This Session's Readings (${sensorsData.length})`;
@@ -83,13 +99,13 @@ export default function Home() {
         {/* Show a button to start/stop tracking if sensors are available */}
         {!noSensorAvailable && (
           <TextButton
-            onPress={sensorsController}
+            onPress={handleSensorsControl}
             title={startSensors ? "Stop Tracking" : "Start Tracking"}
           />
         )}
 
         {/* Show buttons for session data and graph if tracking has stopped */}
-        {dataButtonCheck() && (
+        {showDataButton && (
           <>
             <NavigationLink navigateTo="/data" title={buttonTitle} />
             <NavigationLink
@@ -102,7 +118,7 @@ export default function Home() {
         )}
 
         {/* Show a button to view session history if available */}
-        {historyButtonCheck() && (
+        {showHistoryButton && (
           <NavigationLink title="View All Sessions" navigateTo="/history" />
         )}
       </View>

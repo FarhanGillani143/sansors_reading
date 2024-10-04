@@ -6,8 +6,8 @@ import DateLabel from "../Shared/DateLabel";
 import RenderXAxis from "../Shared/RenderXAxis";
 import RenderYAxis from "../Shared/RenderYAxis";
 import { SVG_HEIGHT, SVG_WIDTH } from "../Shared/Contants";
+import { VarianceGraphType } from "../../../types/DataTypes";
 import { generateVarianceCurve } from "../../../utils/Graphs/VarianceCurve";
-import { VarianceDataType, VarianceGraphType } from "../../../types/DataTypes";
 import { calculateMeanVariance } from "../../../utils/Graphs/CalculateVariance";
 import {
   SensorsContext,
@@ -31,14 +31,11 @@ export default function AccelerationVarianceGraph({
   recordsLimit,
 }: Props) {
   // Extract sensor data and time interval from the global context
-  const { startSensors, sensorsData, varianceData, updateVarianceData } =
+  const { sensorsData, varianceData, updateVarianceData } =
     useContext<SensorContextType>(SensorsContext);
 
   // Store the generated graph data (such as curves and axis labels)
   const [graphData, setGraphData] = useState<VarianceGraphType>();
-
-  // A reference to store variance data points
-  const varianceDataRef = useRef<VarianceDataType[]>([]);
 
   const standardMax = +0.09;
   const standardMin = -0.03;
@@ -70,8 +67,6 @@ export default function AccelerationVarianceGraph({
       const variance = calculateMeanVariance(lastMinuteData);
       const timestamp = new Date();
 
-      // Append the new variance data point with a timestamp
-      varianceDataRef.current.push({ variance, timestamp });
       // Update the value in context provider
       updateVarianceData({ variance, timestamp });
 
@@ -79,7 +74,7 @@ export default function AccelerationVarianceGraph({
       minValueRef.current = Math.min(minValueRef.current, variance);
       maxValueRef.current = Math.max(maxValueRef.current, variance);
 
-      const lastMinuteVariance = varianceDataRef.current.slice(-recordsLimit);
+      const lastMinuteVariance = varianceData.slice(-recordsLimit);
 
       // Generate the graph using the variance data
       const graph = generateVarianceCurve({
@@ -98,11 +93,9 @@ export default function AccelerationVarianceGraph({
     generateGraphData();
   }, [sensorsData]);
 
-  const currentValue =
-    varianceDataRef?.current[varianceDataRef.current.length - 1]?.variance;
+  const currentValue = varianceData[varianceData.length - 1]?.variance;
 
-  const showCurrentValue =
-    startSensors && graphType === "real-time" && !!currentValue;
+  const showCurrentValue = graphType === "real-time" && !!currentValue;
 
   return (
     <React.Fragment>

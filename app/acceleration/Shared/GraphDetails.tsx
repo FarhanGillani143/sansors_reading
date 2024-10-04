@@ -18,7 +18,7 @@ const lineDetail = [
   { name: "z", color: Z_ACCELERATION_COLOR },
 ];
 
-export default function GraphDetails({ graphType }: Props) {
+const GraphDetails = React.memo(({ graphType }: Props) => {
   const graphTitle =
     graphType === "acceleration"
       ? "Acceleration Graph"
@@ -63,7 +63,7 @@ export default function GraphDetails({ graphType }: Props) {
       )}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {
@@ -93,3 +93,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: "5%",
   },
 });
+
+export default GraphDetails;

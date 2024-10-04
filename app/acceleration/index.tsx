@@ -1,4 +1,4 @@
-import React, { useContext, useRef } from "react";
+import React, { useContext, useMemo } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 
@@ -13,6 +13,10 @@ import {
   SensorContextType,
 } from "../../context/SensorsData/SensorContext";
 import {
+  SensorsConfigContext,
+  SensorsConfigContextType,
+} from "../../context/SensorsConfig/ConfigContext";
+import {
   ConfigContextType,
   ConfigurationContext,
 } from "../../context/Configuration/ConfigurationContext";
@@ -25,20 +29,41 @@ import {
  * @returns {React.ReactElement} The acceleration graph UI with the start/stop tracking functionality.
  */
 export default function AccelerationGraph() {
-  const { sensorsData, startSensors, sensorsController } =
+  const { sensorsData, emptySessionData, storeSessionDataAsync } =
     useContext<SensorContextType>(SensorsContext);
+
+  const { startSensors, sensorsController } =
+    useContext<SensorsConfigContextType>(SensorsConfigContext);
 
   const { sensorTimeInterval } =
     useContext<ConfigContextType>(ConfigurationContext);
 
   const { graphType } = useLocalSearchParams<AccelerationParams>();
 
-  const latestReading = sensorsData[0].accelerationData;
-  const recordsLimit = useRef<number>(60000 / sensorTimeInterval).current;
-  // Track remaining time for generating the graph
-  const remainingTimeToGenerateRef = useRef<number>(
-    sensorTimeInterval * sensorsData.length
+  const recordsLimit = useMemo(
+    () => 60000 / sensorTimeInterval,
+    [sensorTimeInterval]
   );
+
+  const timeToGenerateGraph = useMemo(
+    () => sensorTimeInterval * sensorsData.length,
+    [sensorTimeInterval]
+  );
+
+  console.log("Rendering Accleration Index...");
+
+  const latestReading = sensorsData[0].accelerationData;
+  const showGraph = sensorsData.length > recordsLimit;
+
+  const handleSensorsControl = async () => {
+    if (startSensors) {
+      sensorsController();
+      await storeSessionDataAsync();
+    } else {
+      emptySessionData();
+      sensorsController();
+    }
+  };
 
   return (
     <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
@@ -50,7 +75,7 @@ export default function AccelerationGraph() {
             z={latestReading?.z}
           />
         )}
-        {sensorsData.length > recordsLimit ? (
+        {showGraph ? (
           <>
             <GraphDetails graphType="variance" />
             <AccelerationVarianceGraph
@@ -59,12 +84,10 @@ export default function AccelerationGraph() {
             />
           </>
         ) : (
-          <ProgressIndicator
-            remainingTime={remainingTimeToGenerateRef.current}
-          />
+          <ProgressIndicator remainingTime={timeToGenerateGraph} />
         )}
-        {startSensors && sensorsData.length > recordsLimit && (
-          <TextButton title={"Stop Tracking"} onPress={sensorsController} />
+        {startSensors && showGraph && (
+          <TextButton title={"Stop Tracking"} onPress={handleSensorsControl} />
         )}
       </View>
     </ScrollView>
