@@ -4,19 +4,19 @@ import * as Location from "expo-location"; // Import Expo's location API
 
 import TextButton from "../../../components/TextButton";
 import { LocationDataType } from "../../../types/DataTypes";
-import { mpsToKph, mpsToMph } from "../../../utils/SpeedConversions"; // Utility functions to convert speed
+import { speedConversion } from "../../../utils/SpeedConversions"; // Utility functions to convert speed
 import {
   SensorsContext,
   SensorContextType,
 } from "../../../context/SensorsData/SensorContext"; // Sensor context for sensor-related data
 import {
-  ConfigContextType,
-  ConfigurationContext,
-} from "../../../context/Configuration/ConfigurationContext"; // Configuration context for app configuration data
-import {
   SensorsConfigContext,
   SensorsConfigContextType,
 } from "../../../context/SensorsConfig/ConfigContext";
+import {
+  ConfigContextType,
+  ConfigurationContext,
+} from "../../../context/Configuration/ConfigurationContext"; // Configuration context for app configuration data
 
 /**
  * Default position object used to reset the position state
@@ -33,40 +33,32 @@ const emptyPositionObject = {
 };
 
 export default function LocationTracking() {
-  const { updateSensorsData } = useContext<SensorContextType>(SensorsContext);
-
   const { startSensors, locationPermission, requestLocationPermission } =
     useContext<SensorsConfigContextType>(SensorsConfigContext);
 
   const { speedUnit, sensorTimeInterval } =
     useContext<ConfigContextType>(ConfigurationContext);
 
+  const { updateSensorsData } = useContext<SensorContextType>(SensorsContext);
   const [currentPosition, setCurrentPosition] =
     useState<LocationDataType>(emptyPositionObject); // State to store the current location data
-
-  /**
-   * Converts the raw speed data (in meters per second) to the appropriate unit (KM/H or Miles/H)
-   */
-  const speedCalculation = (speed: number | null) => {
-    if (speed && speed != -1) {
-      // Convert the speed to the configured speed unit
-      if (speedUnit === "mph") return `${mpsToMph(speed).toFixed(2)} Miles/H`;
-      return `${mpsToKph(speed).toFixed(2)} KM/H`;
-    } else {
-      // Default to 0 if speed is null or invalid
-      return `0${speedUnit === "kph" ? " KM/H" : " Miles/H"}`;
-    }
-  };
 
   /**
    * Callback function to handle location updates from the Location API.
    */
   const watchPositionCallback = (position: Location.LocationObject) => {
-    const speed = speedCalculation(position.coords.speed); // Calculate speed with unit conversion
-    setCurrentPosition({ ...position.coords, speed }); // Update state with the latest location data
-    updateSensorsData({
-      location: { ...position.coords, speed }, // Update sensor data context with the location and speed
-    });
+    const currentSpeed = speedConversion({
+      newUnit: speedUnit,
+      previousUnit: "mps",
+      speed: position.coords.speed,
+    }); // Calculate speed with unit conversion
+
+    const locationData = {
+      ...position.coords,
+      speed: `${currentSpeed} ${speedUnit}`,
+    };
+    setCurrentPosition(locationData); // Update state with the latest location data
+    updateSensorsData({ location: locationData }); // Update sensor data context with the location and speed
   };
 
   // Configuration options for Location.watchPositionAsync
@@ -108,12 +100,18 @@ export default function LocationTracking() {
       {locationPermission ? (
         <View style={styles.container}>
           <Text style={styles.title}>Location Tracking</Text>
-          <Text>
-            Heading: {currentPosition.heading?.toFixed(2)}° from north
-          </Text>
-          <Text>Latitude: {currentPosition.latitude.toFixed(4)}°</Text>
-          <Text>Longitude: {currentPosition.longitude.toFixed(4)}°</Text>
-          <Text>Altitude: {currentPosition.altitude?.toFixed(2)}m</Text>
+          <View style={styles.row}>
+            <Text>Altitude: {currentPosition.altitude?.toFixed(2)}m</Text>
+            <View style={styles.divider}></View>
+            <Text>
+              Heading: {currentPosition.heading?.toFixed(2)}° from north
+            </Text>
+          </View>
+          <View style={styles.row}>
+            <Text>Latitude: {currentPosition.latitude.toFixed(4)}°</Text>
+            <View style={styles.divider}></View>
+            <Text>Longitude: {currentPosition.longitude.toFixed(4)}°</Text>
+          </View>
           <Text>Speed: {currentPosition.speed}</Text>
         </View>
       ) : (
@@ -144,5 +142,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     marginVertical: 10,
+  },
+  row: {
+    gap: 10,
+    flexDirection: "row",
+  },
+  divider: {
+    borderWidth: 1,
+    borderColor: "black",
   },
 });

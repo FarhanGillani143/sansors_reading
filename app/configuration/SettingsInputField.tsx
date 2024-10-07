@@ -8,30 +8,31 @@ import {
   ViewStyle,
   StyleSheet,
 } from "react-native";
+import { SpeedUnits } from "../../types/DataTypes";
 
 interface Props {
-  value: number;
+  currentValue: number;
   description: string;
-  speedUnit: "kph" | "mph";
+  speedUnit: SpeedUnits;
   style?: StyleProp<ViewStyle>;
-  updateSelectedValue(speed: number): void;
+  updateValueAsync(speed: number): Promise<void>;
 }
 
 export default function SettingsInputField({
   style,
-  value,
   speedUnit,
   description,
-  updateSelectedValue,
+  currentValue,
+  updateValueAsync,
 }: Props) {
-  const inputValueRef = useRef<string>(value.toString());
+  const inputValueRef = useRef<string>(currentValue.toString());
   const textInputRef = useRef<TextInput>(null);
 
   const handleChange = (text: string) => (inputValueRef.current = text);
 
-  const handleOnBlur = () => {
+  const handleOnBlur = async () => {
     if (inputValueRef.current)
-      updateSelectedValue(Number(inputValueRef.current));
+      await updateValueAsync(Number(inputValueRef.current));
 
     textInputRef.current?.clear();
   };
@@ -43,16 +44,14 @@ export default function SettingsInputField({
         <TextInput
           ref={textInputRef}
           style={styles.inputField}
-          placeholder={`${value}`}
+          placeholder={`${currentValue}`}
           returnKeyType="done"
           keyboardType="number-pad"
           placeholderTextColor={"silver"}
           onBlur={handleOnBlur}
           onChange={(changeEvent) => handleChange(changeEvent.nativeEvent.text)}
         />
-        <Text style={{ fontSize: 14 }}>
-          {speedUnit === "kph" ? "KM/H" : "Miles/H"}
-        </Text>
+        <Text style={{ fontSize: 14 }}>{speedUnit}</Text>
       </View>
     </View>
   );

@@ -65,7 +65,4 @@ export type VarianceDataType = {
   timestamp: Date;
 };
 
-export type SpeedDataType = {
-  speed: number;
-  unit: "kph" | "mph";
-};
+export type SpeedUnits = "KM/H" | "Miles/H";

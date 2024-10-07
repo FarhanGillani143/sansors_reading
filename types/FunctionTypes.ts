@@ -1,4 +1,5 @@
 import {
+  SpeedUnits,
   SensorDataType,
   LocationDataType,
   AccelerometerDataType,
@@ -44,4 +45,10 @@ export type UpdateMinMaxType = {
   prevMin: number; // Previous minimum acceleration value from the dataset.
   prevMax: number; // Previous maximum acceleration value from the dataset.
   latestReading: SensorDataType; // Latest sensor reading, which contains acceleration data for x, y, and z axes.
+};
+
+export type SpeedConversionType = {
+  speed: number | null;
+  newUnit: SpeedUnits;
+  previousUnit: SpeedUnits | "mps";
 };

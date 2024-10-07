@@ -30,15 +30,15 @@ export const storeValueAsync = async ({ value, key }: StoreValueType) => {
  * Retrieves a value asynchronously from the local filesystem using the provided key.
  *
  * @param {string} key - The unique key associated with the stored value.
- * @returns {Promise<any | boolean>} - A promise that resolves with the stored value, or `false` if an error occurs.
+ * @returns {Promise<any | boolean>} - A promise that resolves with the stored value, or `null` if an error occurs.
  */
-export const retrieveValueAsync = async (key: string) => {
+export const retrieveValueAsync = async (key: string): Promise<any | null> => {
   const uriPath = FileSystem.documentDirectory + `${key}`; // Defines the path from which to retrieve the value
   try {
     const fileContent = await FileSystem.readAsStringAsync(uriPath); // Read the content from the file
     return JSON.parse(fileContent); // Parse the stored value and return it
   } catch (error) {
-    return false; // Return `false` if the file can't be read (e.g., file doesn't exist)
+    return null; // Return `null` if the file can't be read (e.g., file doesn't exist)
   }
 };
 

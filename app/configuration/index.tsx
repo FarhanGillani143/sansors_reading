@@ -9,23 +9,22 @@ import {
 } from "react-native";
 
 import RadioButtonGroup from "./RadioButtonGroup"; // Custom component for rendering radio button groups
+import { SpeedUnits } from "../../types/DataTypes"; // Type definition for speed data
 import SettingsInputField from "./SettingsInputField"; // Custom component for rendering input fields
 import SensorTimeInterval from "./SensorTimeInterval"; // Custom component to set the sensor time interval
-import { SpeedDataType } from "../../types/DataTypes"; // Type definition for speed data
-import { kphToMph, mphToKph } from "../../utils/SpeedConversions"; // Utility functions for converting speed units
 import {
   ConfigContextType,
   ConfigurationContext,
 } from "../../context/Configuration/ConfigurationContext"; // Context for managing configuration settings
 
 // Speed unit options for the radio button group
-const speedUnitOptions: { label: string; value: "kph" | "mph" }[] = [
-  { label: "KM/H", value: "kph" },
-  { label: "Miles/H", value: "mph" },
+const speedUnitOptions: { label: SpeedUnits; value: SpeedUnits }[] = [
+  { label: "KM/H", value: "KM/H" },
+  { label: "Miles/H", value: "Miles/H" },
 ];
 
 // Options for whether or not to display the comfort graph
-const comfortGraphOptions = [
+const comfortGraphOptions: { label: "Yes" | "No"; value: boolean }[] = [
   { label: "Yes", value: true },
   { label: "No", value: false },
 ];
@@ -37,28 +36,12 @@ export default function Configuration() {
     warningSpeed,
     accelerationEndSpeed,
     accelerationStartSpeed,
-    updateSpeedUnit,
-    updateWarningSpeed,
-    updateDisplayGraph,
-    updateAccelerationEndSpeed,
-    updateAccelerationStartSpeed,
+    updateSpeedUnitAsync,
+    updateWarningSpeedAsync,
+    updateDisplayGraphAsync,
+    updateAccelerationEndAsync,
+    updateAccelerationStartAsync,
   } = useContext<ConfigContextType>(ConfigurationContext);
-
-  /**
-   * Converts and formats the speed value based on the selected speed unit.
-   */
-  const speedValue = (speedData: SpeedDataType) => {
-    let speed: string; // toFixed returns a string
-
-    // If the current speed unit matches the speed data's unit, no conversion is needed
-    if (speedData.unit === speedUnit) speed = speedData.speed.toFixed(0);
-    // Convert mph to kph if the unit is kph
-    else if (speedUnit === "kph") speed = mphToKph(speedData.speed).toFixed(0);
-    // Convert kph to mph if the unit is mph
-    else speed = kphToMph(speedData.speed).toFixed(0);
-
-    return Number(speed); // Convert the string back to a number
-  };
 
   return (
     <KeyboardAvoidingView
@@ -77,7 +60,7 @@ export default function Configuration() {
             <RadioButtonGroup
               value={displayGraph}
               options={comfortGraphOptions}
-              getSelectedValue={updateDisplayGraph}
+              updateValueAsync={updateDisplayGraphAsync}
             />
           </View>
 
@@ -87,15 +70,15 @@ export default function Configuration() {
             <RadioButtonGroup
               value={speedUnit}
               options={speedUnitOptions}
-              getSelectedValue={updateSpeedUnit}
+              updateValueAsync={updateSpeedUnitAsync}
             />
           </View>
 
           {/* Input field for the warning speed limit */}
           <SettingsInputField
-            value={speedValue(warningSpeed)}
+            currentValue={warningSpeed}
             speedUnit={speedUnit}
-            updateSelectedValue={updateWarningSpeed}
+            updateValueAsync={updateWarningSpeedAsync}
             description="Warning Speed Limit"
           />
 
@@ -103,8 +86,8 @@ export default function Configuration() {
           <SettingsInputField
             style={styles.column}
             speedUnit={speedUnit}
-            value={speedValue(accelerationStartSpeed)}
-            updateSelectedValue={updateAccelerationStartSpeed}
+            currentValue={accelerationStartSpeed}
+            updateValueAsync={updateAccelerationStartAsync}
             description="Measure Acceleration Start Speed"
           />
 
@@ -112,8 +95,8 @@ export default function Configuration() {
           <SettingsInputField
             style={styles.column}
             speedUnit={speedUnit}
-            value={speedValue(accelerationEndSpeed)}
-            updateSelectedValue={updateAccelerationEndSpeed}
+            currentValue={accelerationEndSpeed}
+            updateValueAsync={updateAccelerationEndAsync}
             description="Measure Acceleration End Speed"
           />
         </View>

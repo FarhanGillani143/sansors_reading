@@ -7,12 +7,10 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
-
-// Define a union type for speed units
-type speedUnitType = "kph" | "mph";
+import { SpeedUnits } from "../../types/DataTypes";
 
 // Generic type that can either be a boolean or speedUnitType
-type GenericType = boolean | speedUnitType;
+type GenericType = boolean | SpeedUnits;
 
 // Type for radio button options, each option has a label and a value of type T
 type OptionsType<T extends GenericType> = {
@@ -25,7 +23,7 @@ type Props<T extends GenericType> = {
   value: T; // The current selected value
   options: OptionsType<T>[]; // Array of options for the radio buttons
   style?: StyleProp<ViewStyle>; // Optional style for the container
-  getSelectedValue(value: T): void; // Callback to handle value selection
+  updateValueAsync(value: T): Promise<void>; // Callback to handle value selection
 };
 
 // RadioButtonGroup component that supports generic values (boolean or speedUnitType)
@@ -33,7 +31,7 @@ export default function RadioButtonGroup<T extends GenericType>({
   value,
   style,
   options,
-  getSelectedValue,
+  updateValueAsync,
 }: Props<T>) {
   const [selectedValue, setSelectedValue] = useState<T>(value); // State to track the selected value
 
@@ -41,10 +39,10 @@ export default function RadioButtonGroup<T extends GenericType>({
    * Handles press event when a radio button is selected.
    * Updates the local state and triggers the parent callback.
    */
-  function handlePress(value: T) {
+  const handlePress = async (value: T) => {
     setSelectedValue(value); // Update the selected value locally
-    getSelectedValue(value); // Notify the parent component of the new selected value
-  }
+    await updateValueAsync(value); // Notify the parent component of the new selected value
+  };
 
   return (
     <View style={[styles.container, style]}>

@@ -6,8 +6,8 @@ import LocationTracking from "./Location/LocationTracking";
 import NavigationLink from "../../components/NavigationButton";
 import AccelerometerSensor from "./Accelerometer/Accelerometer";
 import {
-  SensorContextType,
   SensorsContext,
+  SensorContextType,
 } from "../../context/SensorsData/SensorContext";
 import {
   SensorsConfigContext,
@@ -81,7 +81,10 @@ export default function Home() {
 
       {/* Display start and end times of the current session */}
       <View
-        style={[styles.sessionInfo, { borderWidth: sessionStartTime ? 1 : 0 }]}
+        style={[
+          sessionStartTime && styles.sessionInfo,
+          { borderWidth: sessionStartTime ? 1 : 0 },
+        ]}
       >
         {sessionStartTime && (
           <Text>{startSensors ? "Current Session" : "Last Session"}</Text>
