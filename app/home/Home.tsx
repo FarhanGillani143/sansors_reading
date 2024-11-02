@@ -1,60 +1,77 @@
-import React, { useCallback, useContext } from "react";
-import { Text, View, Button, StyleSheet } from "react-native";
+import React, { useContext, useMemo } from "react";
+import { Text, View, StyleSheet } from "react-native";
 
+import TextButton from "../../components/TextButton";
 import LocationTracking from "./Location/LocationTracking";
+import NavigationLink from "../../components/NavigationButton";
 import AccelerometerSensor from "./Accelerometer/Accelerometer";
-import NavigationButton from "../../components/NavigationButton";
-import SensorTimeInterval from "./SensorTimeInterval/SensorTimeInterval";
-import { SensorContextType, SensorsContext } from "../../context/SensorContext";
+import {
+  SensorsContext,
+  SensorContextType,
+} from "../../context/SensorsData/SensorContext";
+import {
+  SensorsConfigContext,
+  SensorsConfigContextType,
+} from "../../context/SensorsConfig/ConfigContext";
 
 /**
  * Home Component - Main dashboard for displaying sensor data and navigation controls.
  */
 export default function Home() {
+  const { sensorsData, emptySessionData, storeSessionDataAsync } =
+    useContext<SensorContextType>(SensorsContext);
+
   const {
-    sensorsData,
     allSessions,
     startSensors,
     sessionEndTime,
     sessionStartTime,
     noSensorAvailable,
     sensorsController,
-  } = useContext<SensorContextType>(SensorsContext);
+  } = useContext<SensorsConfigContextType>(SensorsConfigContext);
 
   /**
    * Determines whether to show the "View This Session's Readings" button
    * based on whether tracking has stopped and data is available.
    */
-  const dataButtonCheck = useCallback(
+  const showDataButton = useMemo(
     () => !startSensors && sensorsData.length > 0,
-    [startSensors, sensorsData]
+    [startSensors]
   );
 
   /**
    * Determines whether to show the "View All Sessions" button
    * based on whether tracking has stopped and session history exists.
    */
-  const historyButtonCheck = useCallback(
+  const showHistoryButton = useMemo(
     () => !startSensors && allSessions.length > 0,
     [startSensors, allSessions]
   );
+
+  const handleSensorsControl = async () => {
+    if (startSensors) {
+      sensorsController();
+      await storeSessionDataAsync();
+    } else {
+      emptySessionData();
+      sensorsController();
+    }
+  };
 
   // Button title showing the number of readings available in the current session
   const buttonTitle = `View This Session's Readings (${sensorsData.length})`;
 
   return (
     <View style={styles.container}>
-      {/* Interval settings for sensor tracking */}
-      <SensorTimeInterval />
-
       {/* Component handling accelerometer sensor */}
       <AccelerometerSensor />
 
       {/* If sensors are active, show a button to view the real-time graph */}
       {startSensors && (
-        <NavigationButton
-          navigateTo="/graphs"
-          title="View Real-time Graph"
+        <NavigationLink
+          navigateTo="/acceleration"
+          params={{ graphType: "real-time" }}
+          title="View Real-time Variance Graph"
           style={{ paddingVertical: 10 }}
         />
       )}
@@ -63,12 +80,20 @@ export default function Home() {
       <LocationTracking />
 
       {/* Display start and end times of the current session */}
-      <View style={{ gap: 10, paddingVertical: 10 }}>
+      <View
+        style={[
+          sessionStartTime && styles.sessionInfo,
+          { borderWidth: sessionStartTime ? 1 : 0 },
+        ]}
+      >
         {sessionStartTime && (
-          <Text>Session Started at: {sessionStartTime.toLocaleString()}</Text>
+          <Text>{startSensors ? "Current Session" : "Last Session"}</Text>
+        )}
+        {sessionStartTime && (
+          <Text>Started at: {sessionStartTime.toLocaleString()}</Text>
         )}
         {sessionEndTime && !startSensors && (
-          <Text>Session Ended at: {sessionEndTime.toLocaleString()}</Text>
+          <Text>Ended at: {sessionEndTime.toLocaleString()}</Text>
         )}
       </View>
 
@@ -76,23 +101,28 @@ export default function Home() {
       <View style={styles.buttons}>
         {/* Show a button to start/stop tracking if sensors are available */}
         {!noSensorAvailable && (
-          <Button
-            onPress={sensorsController}
+          <TextButton
+            onPress={handleSensorsControl}
             title={startSensors ? "Stop Tracking" : "Start Tracking"}
           />
         )}
 
         {/* Show buttons for session data and graph if tracking has stopped */}
-        {dataButtonCheck() && (
+        {showDataButton && (
           <>
-            <NavigationButton title={buttonTitle} navigateTo="/data" />
-            <NavigationButton title="View Graph" navigateTo="/graphs" />
+            <NavigationLink navigateTo="/data" title={buttonTitle} />
+            <NavigationLink
+              navigateTo="/acceleration"
+              params={{ graphType: "general" }}
+              title="View Real-time Variance Graph"
+              style={{ paddingVertical: 10 }}
+            />
           </>
         )}
 
         {/* Show a button to view session history if available */}
-        {historyButtonCheck() && (
-          <NavigationButton title="View All Sessions" navigateTo="/history" />
+        {showHistoryButton && (
+          <NavigationLink title="View All Sessions" navigateTo="/history" />
         )}
       </View>
     </View>
@@ -101,9 +131,17 @@ export default function Home() {
 
 const styles = StyleSheet.create({
   container: {
+    gap: 10,
     flex: 1,
     width: "100%",
     alignItems: "center",
+  },
+  sessionInfo: {
+    gap: 10,
+    paddingVertical: 10,
+    alignItems: "center",
+    borderColor: "black",
+    paddingHorizontal: 20,
   },
   buttons: {
     gap: 10,

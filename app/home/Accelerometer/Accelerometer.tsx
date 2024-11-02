@@ -5,7 +5,15 @@ import { Accelerometer } from "expo-sensors";
 import {
   SensorsContext,
   SensorContextType,
-} from "../../../context/SensorContext";
+} from "../../../context/SensorsData/SensorContext";
+import {
+  ConfigContextType,
+  ConfigurationContext,
+} from "../../../context/Configuration/ConfigurationContext";
+import {
+  SensorsConfigContext,
+  SensorsConfigContextType,
+} from "../../../context/SensorsConfig/ConfigContext";
 
 interface AccelerationDataType {
   x: number | undefined;
@@ -36,12 +44,13 @@ export default function AccelerometerSensor() {
     z: 0,
   });
 
-  const {
-    startSensors,
-    timeInterval,
-    updateSensorsData,
-    isAccelerometerAvailable,
-  } = useContext<SensorContextType>(SensorsContext);
+  const { updateSensorsData } = useContext<SensorContextType>(SensorsContext);
+
+  const { startSensors, isAccelerometerAvailable } =
+    useContext<SensorsConfigContextType>(SensorsConfigContext);
+
+  const { sensorTimeInterval } =
+    useContext<ConfigContextType>(ConfigurationContext);
 
   /**
    * Stops tracking by removing all accelerometer listeners and resetting state.
@@ -56,7 +65,7 @@ export default function AccelerometerSensor() {
    * to handle accelerometer data updates.
    */
   const startTracking = () => {
-    Accelerometer.setUpdateInterval(timeInterval);
+    Accelerometer.setUpdateInterval(sensorTimeInterval);
     Accelerometer.addListener((data) => {
       setCurrentAcceleration(data);
       updateSensorsData({ acceleration: data }); // Call the external updateData function with the latest data
@@ -94,8 +103,8 @@ const styles = StyleSheet.create({
   },
   dataPoints: {
     gap: 5,
-    padding: 10,
     width: "100%",
+    paddingVertical: 20,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#e0f2f1",

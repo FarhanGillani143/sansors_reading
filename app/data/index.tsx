@@ -1,9 +1,13 @@
 import React, { useContext } from "react";
-import { View, Text, StyleSheet, FlatList, Button } from "react-native";
+import { View, Text, StyleSheet, FlatList } from "react-native";
 
 import { renderItem } from "./RenderItem";
 import { downloadCSV } from "../../utils/ArrayToCSV";
-import { SensorContextType, SensorsContext } from "../../context/SensorContext";
+import TextButton from "../../components/TextButton";
+import {
+  SensorsContext,
+  SensorContextType,
+} from "../../context/SensorsData/SensorContext";
 
 const EmptyListComponent = (
   <View style={{ alignItems: "center" }}>
@@ -19,7 +23,7 @@ export default function DisplayDataList() {
 
   return (
     <View style={styles.dataContainer}>
-      <Button onPress={handleDownload} title={"Download Data as CSV"} />
+      <TextButton onPress={handleDownload} title={"Download Data as CSV"} />
       <Text>Total Records: {sensorsData.length}</Text>
       <View style={styles.flatListContainer}>
         <FlatList

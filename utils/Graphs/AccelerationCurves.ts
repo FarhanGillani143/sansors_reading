@@ -6,7 +6,7 @@ import {
   X_ACCELERATION_COLOR,
   Y_ACCELERATION_COLOR,
   Z_ACCELERATION_COLOR,
-} from "../../app/graphs/Acceleration/Contants";
+} from "../../app/acceleration/Shared/Contants";
 
 type GraphLineParameters = {
   minValue: number;
@@ -103,8 +103,14 @@ export function generateAccelerationCurves({
   // Get the x-axis scale and labels based on the time range
   const { xAxisScale, xAxisData } = getXAxisData(startTime, endTime);
 
+  const numOfTicks = 6;
+
   // Get the y-axis scale and labels based on the acceleration range
-  const { yAxisScale, yAxisData } = getYAxisData(minValue, maxValue);
+  const { yAxisScale, yAxisData } = getYAxisData(
+    minValue,
+    maxValue,
+    numOfTicks
+  );
 
   // Generate the acceleration curves for X, Y, and Z axes
   const accelerationCurves = generateCurves({

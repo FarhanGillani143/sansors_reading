@@ -27,7 +27,7 @@ export function convertArrayToCSV(arr: SensorDataType[]) {
     "Accuracy (m)",
     "Latitude (°)",
     "Longitude (°)",
-    "Speed (km/h)",
+    "Speed",
   ];
 
   const rows = arr.map(

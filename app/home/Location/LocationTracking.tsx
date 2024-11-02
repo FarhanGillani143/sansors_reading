@@ -1,11 +1,22 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import { Button, StyleSheet, Text, View, Alert } from "react-native";
-import * as Location from "expo-location";
+import { StyleSheet, Text, View, Alert } from "react-native";
+import * as Location from "expo-location"; // Import Expo's location API
 
+import TextButton from "../../../components/TextButton";
+import { LocationDataType } from "../../../types/DataTypes";
+import { speedConversion } from "../../../utils/SpeedConversions"; // Utility functions to convert speed
 import {
   SensorsContext,
   SensorContextType,
-} from "../../../context/SensorContext";
+} from "../../../context/SensorsData/SensorContext"; // Sensor context for sensor-related data
+import {
+  SensorsConfigContext,
+  SensorsConfigContextType,
+} from "../../../context/SensorsConfig/ConfigContext";
+import {
+  ConfigContextType,
+  ConfigurationContext,
+} from "../../../context/Configuration/ConfigurationContext"; // Configuration context for app configuration data
 
 /**
  * Default position object used to reset the position state
@@ -17,59 +28,64 @@ const emptyPositionObject = {
   heading: 0,
   latitude: 0,
   longitude: 0,
-  speed: 0,
+  speed: "0",
   altitudeAccuracy: 0,
 };
 
 export default function LocationTracking() {
-  const {
-    timeInterval,
-    startSensors, // Indicates if sensors should be active
-    locationPermission,
-    updateSensorsData,
-    requestLocationPermission,
-  } = useContext<SensorContextType>(SensorsContext);
+  const { startSensors, locationPermission, requestLocationPermission } =
+    useContext<SensorsConfigContextType>(SensorsConfigContext);
 
+  const { speedUnit, sensorTimeInterval } =
+    useContext<ConfigContextType>(ConfigurationContext);
+
+  const { updateSensorsData } = useContext<SensorContextType>(SensorsContext);
   const [currentPosition, setCurrentPosition] =
-    useState<Location.LocationObjectCoords>(emptyPositionObject);
+    useState<LocationDataType>(emptyPositionObject); // State to store the current location data
 
+  /**
+   * Callback function to handle location updates from the Location API.
+   */
   const watchPositionCallback = (position: Location.LocationObject) => {
-    // Convert speed from m/s to km/h
-    const speed =
-      position.coords.speed && position.coords.speed != -1
-        ? position.coords.speed * 3.6
-        : 0;
-    setCurrentPosition({ ...position.coords, speed });
-    updateSensorsData({
-      location: { ...position.coords, speed },
-    });
+    const currentSpeed = speedConversion({
+      newUnit: speedUnit,
+      previousUnit: "mps",
+      speed: position.coords.speed,
+    }); // Calculate speed with unit conversion
+
+    const locationData = {
+      ...position.coords,
+      speed: `${currentSpeed} ${speedUnit}`,
+    };
+    setCurrentPosition(locationData); // Update state with the latest location data
+    updateSensorsData({ location: locationData }); // Update sensor data context with the location and speed
   };
 
-  // Configuration for Location.watchPositionAsync
+  // Configuration options for Location.watchPositionAsync
   const watchPositionConfig = {
-    timeInterval,
+    timeInterval: sensorTimeInterval, // Interval for receiving location updates
     distanceInterval: 0, // Track location updates regardless of the distance moved
-    accuracy: Location.LocationAccuracy.BestForNavigation, // Use the best accuracy available for navigation
+    accuracy: Location.LocationAccuracy.BestForNavigation, // Set the highest accuracy level for navigation purposes
   };
 
-  const subscriptionRef = useRef<Location.LocationSubscription>();
+  const subscriptionRef = useRef<Location.LocationSubscription>(); // Ref to hold the subscription object
 
   useEffect(() => {
     (async () => {
       if (locationPermission && startSensors) {
+        // If location permission is granted and sensors are active, start tracking location
         try {
-          // Start tracking the position if permission is granted and sensors are active
           subscriptionRef.current = await Location.watchPositionAsync(
             watchPositionConfig,
-            watchPositionCallback
+            watchPositionCallback // Use callback to handle position updates
           );
         } catch (error) {
-          Alert.alert("Error", "Unable to track location.");
+          Alert.alert("Error", "Unable to track location."); // Show alert if there's an error
         }
       } else {
-        // Stop tracking the position and reset the position state if sensors are stopped or permission is denied
+        // If sensors are stopped or permission is not granted, stop tracking and reset the position state
         if (subscriptionRef.current) subscriptionRef.current.remove();
-        setCurrentPosition(emptyPositionObject);
+        setCurrentPosition(emptyPositionObject); // Reset location data when sensors stop
       }
     })();
 
@@ -84,19 +100,25 @@ export default function LocationTracking() {
       {locationPermission ? (
         <View style={styles.container}>
           <Text style={styles.title}>Location Tracking</Text>
-          <Text>
-            Heading: {currentPosition.heading?.toFixed(2)}° from north
-          </Text>
-          <Text>Latitude: {currentPosition.latitude.toFixed(4)}°</Text>
-          <Text>Longitude: {currentPosition.longitude.toFixed(4)}°</Text>
-          <Text>Altitude: {currentPosition.altitude?.toFixed(2)}m</Text>
-          <Text>Speed: {currentPosition.speed?.toFixed(2)} km/h</Text>
+          <View style={styles.row}>
+            <Text>Altitude: {currentPosition.altitude?.toFixed(2)}m</Text>
+            <View style={styles.divider}></View>
+            <Text>
+              Heading: {currentPosition.heading?.toFixed(2)}° from north
+            </Text>
+          </View>
+          <View style={styles.row}>
+            <Text>Latitude: {currentPosition.latitude.toFixed(4)}°</Text>
+            <View style={styles.divider}></View>
+            <Text>Longitude: {currentPosition.longitude.toFixed(4)}°</Text>
+          </View>
+          <Text>Speed: {currentPosition.speed}</Text>
         </View>
       ) : (
         <View style={styles.container}>
           <Text style={styles.title}>Location Tracking</Text>
           <Text style={{ fontSize: 16 }}>Location permission not granted</Text>
-          <Button
+          <TextButton
             title="Request Permission"
             onPress={requestLocationPermission}
           />
@@ -106,6 +128,7 @@ export default function LocationTracking() {
   );
 }
 
+// Styles for the component
 const styles = StyleSheet.create({
   container: {
     gap: 5,
@@ -113,11 +136,19 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#e1bee7",
+    backgroundColor: "#e1bee7", // Light purple background color
   },
   title: {
     fontSize: 18,
     fontWeight: "bold",
     marginVertical: 10,
+  },
+  row: {
+    gap: 10,
+    flexDirection: "row",
+  },
+  divider: {
+    borderWidth: 1,
+    borderColor: "black",
   },
 });

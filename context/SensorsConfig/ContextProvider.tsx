@@ -1,28 +1,17 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AppState, AppStateStatus } from "react-native";
-import * as Location from "expo-location";
 import { Accelerometer } from "expo-sensors";
 import { activateKeepAwakeAsync, deactivateKeepAwake } from "expo-keep-awake";
 
-import { SensorsContext } from "./SensorContext";
-import { UpdateSensorsData } from "../types/FunctionTypes";
-import dateTimeStringWithMilliseconds from "../utils/dateTimeStringwithMs";
-import { requestLocatonPermissionAsync } from "../utils/LocationPermission";
-import { SensorDataType, AccelerometerDataType } from "../types/DataTypes";
-import {
-  storeSessionData,
-  storeSessionNames,
-  retrieveSessionNames,
-  storeTimeIntervalAsync,
-  retrieveTimeIntervalAsync,
-} from "../utils/ManageStorage";
+import { SensorsConfigContext } from "./ConfigContext";
+import { requestLocatonPermissionAsync } from "../../utils/LocationPermission";
+import { storeValueAsync, retrieveValueAsync } from "../../utils/ManageStorage";
 
-type PropsType = {
-  children: JSX.Element | JSX.Element[];
-};
+interface Props {
+  children: JSX.Element | JSX.Element;
+}
 
-export default function SensorContextProvider({ children }: PropsType) {
-  const [sensorsData, setSensorsData] = useState<SensorDataType[]>([]);
+export default function SensorsConfigContextProvider({ children }: Props) {
   const [locationPermission, setLocationPermission] = useState<boolean>(false); // State to track location permission status.
   const [sessionEndTime, setSessionEndTime] = useState<Date>(); // State to track the session end time.
   const [sessionStartTime, setSessionStartTime] = useState<Date>(); // State to track the session start time.
@@ -34,9 +23,6 @@ export default function SensorContextProvider({ children }: PropsType) {
 
   /** State to track whether sensors should be active */
   const [startSensors, setStartSensors] = useState<boolean>(false);
-
-  /** Time interval property for sensors */
-  const [timeInterval, setTimeInterval] = useState<number>(200);
 
   /** Contains names of all the sessions recorded so far */
   const [allSessions, setAllSessions] = useState<string[]>([]);
@@ -57,75 +43,13 @@ export default function SensorContextProvider({ children }: PropsType) {
 
       setAllSessions((previousState) => [sessionName, ...previousState]);
 
-      // Store the session's data and update session names if successful.
-      const isStored = await storeSessionData({ sessionName, sensorsData });
-
-      if (isStored) {
-        await storeSessionNames([sessionName, ...allSessions]);
-      }
+      await storeValueAsync({
+        key: "sessionNames",
+        value: [sessionName, ...allSessions],
+      });
     } else {
-      setSensorsData([]); // Clear previous session data when starting a new session.
       setStartSensors(true);
       setSessionStartTime(timeNow);
-    }
-  };
-
-  /**
-   * Updates the time interval for sensor data collection and stores it locally.
-   *
-   * @param {number} interval - The new time interval to be set.
-   */
-  const updateTimeIntervalAsync = async (interval: number) => {
-    setTimeInterval(interval);
-    await storeTimeIntervalAsync(interval); // Persist the interval setting for future sessions.
-  };
-
-  let locationData: Location.LocationObjectCoords | undefined;
-  let accelerationData: AccelerometerDataType | undefined;
-
-  /**
-   * Updates the sensor data by adding the latest accelerometer and/or location reading
-   * to the beginning of the sensor data array.
-   *
-   * @param {UpdateSensorsData} data - The latest accelerometer and/or location data.
-   */
-  const updateSensorsData = ({ acceleration, location }: UpdateSensorsData) => {
-    if (location) {
-      locationData = location; // Update the location data if available.
-    }
-
-    if (acceleration) {
-      accelerationData = acceleration; // Update the acceleration data if available.
-    }
-
-    /**
-     * Record data based on location permission status.
-     * If location permission is granted, record both location and accelerometer data.
-     * Otherwise, record only accelerometer data.
-     */
-    const recordDataWithLocation =
-      !!acceleration && locationPermission && !!locationData;
-    const recordDataWithoutLocation = !!acceleration && locationPermission;
-    const recordDataWithoutAcceleration =
-      locationPermission && !!locationData && !isAccelerometerAvailable;
-
-    /** Doing all these checks because we want to record data of all the sensors in
-     * a sync if all the sensors are available
-     */
-    if (
-      recordDataWithLocation ||
-      recordDataWithoutLocation ||
-      recordDataWithoutAcceleration
-    ) {
-      const timestamp = dateTimeStringWithMilliseconds();
-      const timeDateObject = new Date();
-      const reading = {
-        timeDateObject,
-        timestamp,
-        locationData,
-        accelerationData,
-      };
-      setSensorsData((prevData) => [reading, ...prevData]); // Add the new reading to the start of the array.
     }
   };
 
@@ -156,10 +80,7 @@ export default function SensorContextProvider({ children }: PropsType) {
         await requestLocationPermission();
       }
 
-      const sensorTimeInterval = await retrieveTimeIntervalAsync();
-      if (sensorTimeInterval) setTimeInterval(sensorTimeInterval);
-
-      const sessionNames = await retrieveSessionNames();
+      const sessionNames: string[] = await retrieveValueAsync("sessionNames");
       if (sessionNames) setAllSessions(sessionNames);
     })();
   }, []);
@@ -204,24 +125,20 @@ export default function SensorContextProvider({ children }: PropsType) {
   }, [appState]);
 
   return (
-    <SensorsContext.Provider
+    <SensorsConfigContext.Provider
       value={{
-        sensorsData,
         allSessions,
         startSensors,
-        timeInterval,
         sessionEndTime,
         sessionStartTime,
         locationPermission,
         isAccelerometerAvailable,
         noSensorAvailable: !locationPermission && !isAccelerometerAvailable,
         sensorsController,
-        updateSensorsData,
-        updateTimeIntervalAsync,
         requestLocationPermission,
       }}
     >
       {children}
-    </SensorsContext.Provider>
+    </SensorsConfigContext.Provider>
   );
 }

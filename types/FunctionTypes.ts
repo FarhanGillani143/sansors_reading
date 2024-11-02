@@ -1,5 +1,9 @@
-import * as Location from "expo-location";
-import { AccelerometerDataType, SensorDataType } from "./DataTypes";
+import {
+  SpeedUnits,
+  SensorDataType,
+  LocationDataType,
+  AccelerometerDataType,
+} from "./DataTypes";
 
 /**
  * Type representing the structure for storing session data.
@@ -34,11 +38,17 @@ export type UpdateSensorsData = {
    * This data is retrieved using the Expo Location API and can include latitude,
    * longitude, altitude, and other relevant location information.
    */
-  location?: Location.LocationObjectCoords;
+  location?: LocationDataType;
 };
 
 export type UpdateMinMaxType = {
   prevMin: number; // Previous minimum acceleration value from the dataset.
   prevMax: number; // Previous maximum acceleration value from the dataset.
   latestReading: SensorDataType; // Latest sensor reading, which contains acceleration data for x, y, and z axes.
+};
+
+export type SpeedConversionType = {
+  speed: number | null;
+  newUnit: SpeedUnits;
+  previousUnit: SpeedUnits | "mps";
 };
