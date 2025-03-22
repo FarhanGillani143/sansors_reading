@@ -30,8 +30,11 @@ export default function TextButton({
 
 const styles = StyleSheet.create({
   text: {
-    fontSize: 18,
-    color: "#007AFF",
+    fontSize: 19,
+    color: "#000000",
     textAlign: "center",
+    backgroundColor:'#ffffff',
+    padding:6,
+    borderRadius:5,
   },
 });

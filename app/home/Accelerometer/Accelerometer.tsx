@@ -27,10 +27,10 @@ export const ShowAccelerationData = ({ x, y, z }: AccelerationDataType) => {
       <Text style={styles.title}>
         Acceleration (in gs where 1g = 9.81 m/s^2)
       </Text>
-      <View style={{ flexDirection: "row", gap: 10 }}>
-        <Text>x: {x?.toFixed(2)} gs</Text>
-        <Text>y: {y?.toFixed(2)} gs</Text>
-        <Text>z: {z?.toFixed(2)} gs</Text>
+      <View style={{ flexDirection: "row", gap: 10, }}>
+      <Text style={{ color: "red",backgroundColor:'skyblue',padding:4, borderRadius:5,fontWeight:'bold' }}>x: {x?.toFixed(2)} gs</Text>
+  <Text style={{ color: "red",backgroundColor:'skyblue',padding:4, borderRadius:5, fontWeight:'bold' }}>y: {y?.toFixed(2)} gs</Text>
+  <Text style={{ color: "red",backgroundColor:'skyblue',padding:4, borderRadius:5, fontWeight:'bold' }}>z: {z?.toFixed(2)} gs</Text>
       </View>
     </View>
   );
@@ -107,10 +107,11 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#e0f2f1",
+    backgroundColor: "#333",
   },
   title: {
     fontSize: 16,
     fontWeight: "bold",
+    color:'#ffffff'
   },
 });

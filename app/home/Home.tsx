@@ -9,7 +9,7 @@ import {
   SensorsContext,
   SensorContextType,
 } from "../../context/SensorsData/SensorContext";
-import {
+import { 
   SensorsConfigContext,
   SensorsConfigContextType,
 } from "../../context/SensorsConfig/ConfigContext";
@@ -71,8 +71,8 @@ export default function Home() {
         <NavigationLink
           navigateTo="/acceleration"
           params={{ graphType: "real-time" }}
-          title="View Real-time Variance Graph"
-          style={{ paddingVertical: 10 }}
+          title="View Real-time Variance Graph" 
+          style={{ paddingVertical: 10,  }}
         />
       )}
 

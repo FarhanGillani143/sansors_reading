@@ -29,7 +29,7 @@ const emptyPositionObject = {
   latitude: 0,
   longitude: 0,
   speed: "0",
-  altitudeAccuracy: 0,
+  altitudeAccuracy: 0, 
 };
 
 export default function LocationTracking() {
@@ -101,18 +101,18 @@ export default function LocationTracking() {
         <View style={styles.container}>
           <Text style={styles.title}>Location Tracking</Text>
           <View style={styles.row}>
-            <Text>Altitude: {currentPosition.altitude?.toFixed(2)}m</Text>
+            <Text style={{color:'red', fontWeight:'bold'}}>Altitude: {currentPosition.altitude?.toFixed(2)}m</Text>
             <View style={styles.divider}></View>
-            <Text>
+            <Text style={{color:'red', fontWeight:'bold'}}>
               Heading: {currentPosition.heading?.toFixed(2)}° from north
             </Text>
           </View>
           <View style={styles.row}>
-            <Text>Latitude: {currentPosition.latitude.toFixed(4)}°</Text>
+            <Text style={{color:'red', fontWeight:'bold'}}>Latitude: {currentPosition.latitude.toFixed(4)}°</Text>
             <View style={styles.divider}></View>
-            <Text>Longitude: {currentPosition.longitude.toFixed(4)}°</Text>
+            <Text style={{color:'red',fontWeight:'bold'}}>Longitude: {currentPosition.longitude.toFixed(4)}°</Text>
           </View>
-          <Text>Speed: {currentPosition.speed}</Text>
+          <Text style={{color:'red', fontWeight:'bold', backgroundColor:'skyblue', padding:5,borderRadius:5,}}>Speed: {currentPosition.speed}</Text>
         </View>
       ) : (
         <View style={styles.container}>
@@ -136,19 +136,24 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#e1bee7", // Light purple background color
+    backgroundColor: "#f7f7f7", // Light purple background color
+    
   },
   title: {
-    fontSize: 18,
+    fontSize: 19,
     fontWeight: "bold",
     marginVertical: 10,
   },
   row: {
     gap: 10,
     flexDirection: "row",
+    backgroundColor:'skyblue',
+    padding:5,
+    borderRadius:5
+
   },
   divider: {
     borderWidth: 1,
-    borderColor: "black",
+    borderColor: "#000000",
   },
 });

@@ -16,4 +16,4 @@ Now use following commad to run the project on simulator or real device
 
 ```
 npx expo start
-```
+```     

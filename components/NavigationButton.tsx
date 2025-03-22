@@ -51,7 +51,7 @@ export default function NavigationLink<T extends keyof AppRoutes>({
   return (
     <Link
       href={hrefWithParams}
-      style={[{ color: "#007AFF", fontSize: 18 }, style]}
+      style={[{ color: "#000000", backgroundColor:'#ffffff', padding:6, borderRadius:5, fontSize: 19 }, style]}
     >
       {title}
     </Link>
