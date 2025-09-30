@@ -11,14 +11,18 @@
   "dependencies": {
     "d3": "^7.9.0",
     "expo": "~51.0.26",
+    "expo-checkbox": "^4.1.4",
     "expo-constants": "~16.0.2",
+    "expo-dev-client": "~4.0.29",
     "expo-file-system": "~17.0.1",
+    "expo-keep-awake": "~13.0.2",
     "expo-linking": "~6.3.1",
     "expo-location": "~17.0.1",
     "expo-router": "~3.5.24",
     "expo-sensors": "~13.0.9",
     "expo-sharing": "~12.0.1",
     "expo-status-bar": "~1.12.1",
+    "firebase": "^12.2.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-native": "0.74.5",
@@ -28,8 +32,7 @@
     "react-native-svg": "15.2.0",
     "react-native-vector-icons": "^10.2.0",
     "react-native-web": "~0.19.10",
-    "expo-dev-client": "~4.0.29",
-    "expo-keep-awake": "~13.0.2"
+    "expo-updates": "~0.25.28"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

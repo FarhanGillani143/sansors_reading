@@ -98,6 +98,8 @@ const styles = StyleSheet.create({
   container: {
     gap: 10,
     width: "100%",
+    height:'100%',
     alignItems: "center", // Center align the graph container horizontally
+    backgroundColor:'#333',
   },
 });

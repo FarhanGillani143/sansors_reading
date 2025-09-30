@@ -9,7 +9,7 @@ import {
   SensorsContext,
   SensorContextType,
 } from "../../context/SensorsData/SensorContext";
-import { 
+import {
   SensorsConfigContext,
   SensorsConfigContextType,
 } from "../../context/SensorsConfig/ConfigContext";
@@ -37,7 +37,7 @@ export default function Home() {
   const showDataButton = useMemo(
     () => !startSensors && sensorsData.length > 0,
     [startSensors]
-  );
+  ); 
 
   /**
    * Determines whether to show the "View All Sessions" button
@@ -63,39 +63,15 @@ export default function Home() {
 
   return (
     <View style={styles.container}>
-      {/* Component handling accelerometer sensor */}
-      <AccelerometerSensor />
-
       {/* If sensors are active, show a button to view the real-time graph */}
       {startSensors && (
         <NavigationLink
           navigateTo="/acceleration"
           params={{ graphType: "real-time" }}
-          title="View Real-time Variance Graph" 
-          style={{ paddingVertical: 10,  }}
+          title="View Real-time Variance Graph"
+          style={{ paddingVertical: 10 }}
         />
       )}
-
-      {/* Component handling location tracking */}
-      <LocationTracking />
-
-      {/* Display start and end times of the current session */}
-      <View
-        style={[
-          sessionStartTime && styles.sessionInfo,
-          { borderWidth: sessionStartTime ? 1 : 0 },
-        ]}
-      >
-        {sessionStartTime && (
-          <Text>{startSensors ? "Current Session" : "Last Session"}</Text>
-        )}
-        {sessionStartTime && (
-          <Text>Started at: {sessionStartTime.toLocaleString()}</Text>
-        )}
-        {sessionEndTime && !startSensors && (
-          <Text>Ended at: {sessionEndTime.toLocaleString()}</Text>
-        )}
-      </View>
 
       {/* Buttons for starting/stopping sensors and navigating to data or history */}
       <View style={styles.buttons}>
@@ -115,7 +91,7 @@ export default function Home() {
               navigateTo="/acceleration"
               params={{ graphType: "general" }}
               title="View Real-time Variance Graph"
-              style={{ paddingVertical: 10 }}
+              style={{ paddingVertical: 10,}}
             />
           </>
         )}
@@ -124,6 +100,29 @@ export default function Home() {
         {showHistoryButton && (
           <NavigationLink title="View All Sessions" navigateTo="/history" />
         )}
+
+        {/* Display start and end times of the current session */}
+        <View
+          style={[
+            sessionStartTime && styles.sessionInfo,
+            { borderWidth: sessionStartTime ? 1 : 0 },
+          ]}
+        >
+          {sessionStartTime && (
+            <Text>{startSensors ? "Current Session" : "Last Session"}</Text>
+          )}
+          {sessionStartTime && (
+            <Text>Started at: {sessionStartTime.toLocaleString()}</Text>
+          )}
+          {sessionEndTime && !startSensors && (
+            <Text>Ended at: {sessionEndTime.toLocaleString()}</Text>
+          )}
+        </View>
+        {/* Component handling accelerometer sensor */}
+        <AccelerometerSensor />
+
+        {/* Component handling location tracking */}
+        <LocationTracking />
       </View>
     </View>
   );
@@ -140,7 +139,7 @@ const styles = StyleSheet.create({
     gap: 10,
     paddingVertical: 10,
     alignItems: "center",
-    borderColor: "black",
+    borderColor: "gray",
     paddingHorizontal: 20,
   },
   buttons: {

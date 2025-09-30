@@ -75,7 +75,7 @@ export default function LocationTracking() {
       if (locationPermission && startSensors) {
         // If location permission is granted and sensors are active, start tracking location
         try {
-          subscriptionRef.current = await Location.watchPositionAsync(
+          subscriptionRef.current = await Location.watchPositionAsync( 
             watchPositionConfig,
             watchPositionCallback // Use callback to handle position updates
           );
@@ -86,7 +86,7 @@ export default function LocationTracking() {
         // If sensors are stopped or permission is not granted, stop tracking and reset the position state
         if (subscriptionRef.current) subscriptionRef.current.remove();
         setCurrentPosition(emptyPositionObject); // Reset location data when sensors stop
-      }
+      } 
     })();
 
     // Clean up the subscription when the component unmounts or dependencies change
@@ -132,17 +132,19 @@ export default function LocationTracking() {
 const styles = StyleSheet.create({
   container: {
     gap: 5,
-    padding: 10,
+    padding: 5,
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#f7f7f7", // Light purple background color
+    backgroundColor: "#333", // Light purple background color
+    borderRadius:5
     
   },
   title: {
     fontSize: 19,
     fontWeight: "bold",
     marginVertical: 10,
+    color:'#ffffff'
   },
   row: {
     gap: 10,
