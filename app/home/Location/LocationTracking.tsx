@@ -89,14 +89,14 @@ export default function LocationTracking() {
       } 
     })();
 
-    // Clean up the subscription when the component unmounts or dependencies change
+    // Clean up the subscription when the component unmounts or dependencies change 
     return () => {
       if (subscriptionRef.current) subscriptionRef.current.remove();
     };
   }, [startSensors, locationPermission]);
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container}> 
       {locationPermission ? (
         <View style={styles.container}>
           <Text style={styles.title}>Location Tracking</Text>

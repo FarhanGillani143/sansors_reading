@@ -1,7 +1,8 @@
+
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator,Alert, } from "react-native";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../firebaseConfig"; // Adjust path
+import { auth } from "../firebaseConfig"; 
 import { router } from "expo-router";
 
 export default function Signup() {
@@ -135,3 +136,4 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 });
+

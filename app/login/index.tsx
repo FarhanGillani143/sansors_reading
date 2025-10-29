@@ -17,7 +17,6 @@ interface FormData {
   password: string;
   agree: boolean;
 }
-
 const LoginForm: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({
     username: "",
@@ -39,10 +38,14 @@ const LoginForm: React.FC = () => {
     }
 
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, username, password);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        username,
+        password
+      );
       const user = userCredential.user;
       Alert.alert("Login Successful", `Welcome, ${user.email}`);
-       router.replace("/home/Home");
+      router.replace("/home/Home");
       setFormData({
         username: "",
         password: "",

@@ -81,7 +81,7 @@ export default function AccelerationGraph() {
             <AccelerationVarianceGraph
               graphType={graphType}
               recordsLimit={recordsLimit}
-            />
+            /> 
           </>
         ) : (
           <ProgressIndicator remainingTime={timeToGenerateGraph} />

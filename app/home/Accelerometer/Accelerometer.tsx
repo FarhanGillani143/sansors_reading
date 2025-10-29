@@ -90,7 +90,7 @@ export default function AccelerometerSensor() {
     setCurrentAcceleration({ x: 0, y: 0, z: 0 });
   };
 
-  /**
+  /** 
    * Starts tracking by setting the update interval and adding a listener
    * to handle accelerometer data updates.
    */
