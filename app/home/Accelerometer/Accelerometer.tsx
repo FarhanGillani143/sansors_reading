@@ -27,10 +27,40 @@ export const ShowAccelerationData = ({ x, y, z }: AccelerationDataType) => {
       <Text style={styles.title}>
         Acceleration (in gs where 1g = 9.81 m/s^2)
       </Text>
-      <View style={{ flexDirection: "row", gap: 10, }}>
-      <Text style={{ color: "red",backgroundColor:'skyblue',padding:4, borderRadius:5,fontWeight:'bold' }}>x: {x?.toFixed(2)} gs</Text>
-  <Text style={{ color: "red",backgroundColor:'skyblue',padding:4, borderRadius:5, fontWeight:'bold' }}>y: {y?.toFixed(2)} gs</Text>
-  <Text style={{ color: "red",backgroundColor:'skyblue',padding:4, borderRadius:5, fontWeight:'bold' }}>z: {z?.toFixed(2)} gs</Text>
+      <View style={{ flexDirection: "row", gap: 10 }}>
+        <Text
+          style={{
+            color: "red",
+            backgroundColor: "skyblue",
+            padding: 4,
+            borderRadius: 5,
+            fontWeight: "bold",
+          }}
+        >
+          x: {x?.toFixed(2)} gs
+        </Text>
+        <Text
+          style={{
+            color: "red",
+            backgroundColor: "skyblue",
+            padding: 4,
+            borderRadius: 5,
+            fontWeight: "bold",
+          }}
+        >
+          y: {y?.toFixed(2)} gs
+        </Text>
+        <Text
+          style={{
+            color: "red",
+            backgroundColor: "skyblue",
+            padding: 4,
+            borderRadius: 5,
+            fontWeight: "bold",
+          }}
+        >
+          z: {z?.toFixed(2)} gs
+        </Text>
       </View>
     </View>
   );
@@ -60,7 +90,7 @@ export default function AccelerometerSensor() {
     setCurrentAcceleration({ x: 0, y: 0, z: 0 });
   };
 
-  /**
+  /** 
    * Starts tracking by setting the update interval and adding a listener
    * to handle accelerometer data updates.
    */
@@ -108,10 +138,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#333",
+    padding: 6,
+    borderRadius: 5,
   },
   title: {
     fontSize: 16,
     fontWeight: "bold",
-    color:'#ffffff'
+    color: "#ffffff",
+    backgroundColor: "#333",
+    marginBottom: 5,
   },
 });

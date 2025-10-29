@@ -6,4 +6,5 @@ export type AppRoutes = {
   "/data": undefined;
   "/history": undefined;
   "/configuration": undefined;
+  "/login" : undefined;
 };

@@ -30,11 +30,12 @@ export default function TextButton({
 
 const styles = StyleSheet.create({
   text: {
-    fontSize: 19,
-    color: "#000000",
+    fontSize: 18,
+    color: "#333",
     textAlign: "center",
-    backgroundColor:'#ffffff',
-    padding:6,
-    borderRadius:5,
+    backgroundColor: "#ffffff",
+    padding: 10, // Increased padding for better spacing
+    borderRadius: 8, // Slightly increased for a smoother look
+    shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 4, elevation: 5,
   },
 });

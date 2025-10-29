@@ -13,20 +13,35 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "runtimeVersion": {
+        "policy": "appVersion"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.anonymous.sensorreadings"
+      "package": "com.anonymous.sensorreadings",
+      "runtimeVersion": "1.0.0"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-router"
-    ]
+    ],
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "99074295-d9a0-4701-8c47-6bfecb870eec"
+      }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/99074295-d9a0-4701-8c47-6bfecb870eec"
+    }
   }
 }
